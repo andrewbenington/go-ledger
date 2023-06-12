@@ -1,0 +1,8 @@
+# transaction data + ledgers
+*.csv
+*.xlsx
+
+bin/
+config/
+
+.DS_Store
