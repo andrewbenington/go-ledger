@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/andrewbenington/go-ledger/cmd/source/csv"
-	"github.com/andrewbenington/go-ledger/cmd/source/file"
+	"github.com/andrewbenington/go-ledger/csv"
+	"github.com/andrewbenington/go-ledger/file"
 	"github.com/andrewbenington/go-ledger/ledger"
 )
 

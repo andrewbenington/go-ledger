@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/andrewbenington/go-ledger/cmd/label"
-	"github.com/andrewbenington/go-ledger/cmd/source/file"
+	"github.com/andrewbenington/go-ledger/file"
 	"github.com/andrewbenington/go-ledger/ledger"
 	"github.com/andrewbenington/go-ledger/util"
 )

@@ -1,7 +1,8 @@
 package ledger
 
 type Ledger struct {
-	Entries []Entry
+	Entries  []Entry
+	entryMap map[string]Entry
 }
 
 func (l *Ledger) InsertEntries(entries []Entry) {

@@ -2,10 +2,11 @@ package assemble
 
 import (
 	"fmt"
+	"os"
 	"sort"
 
 	"github.com/andrewbenington/go-ledger/cmd/source"
-	"github.com/andrewbenington/go-ledger/cmd/source/csv"
+	"github.com/andrewbenington/go-ledger/csv"
 	"github.com/andrewbenington/go-ledger/excel"
 	"github.com/andrewbenington/go-ledger/ledger"
 	"github.com/spf13/cobra"
@@ -34,7 +35,11 @@ func Assemble(cmd *cobra.Command, args []string) {
 }
 
 func LedgerFromSources() ledger.Ledger {
-	allSources := source.All()
+	allSources, err := source.LoadSources()
+	if err != nil {
+		fmt.Printf("error loading sources: %s", err)
+		os.Exit(1)
+	}
 	l := ledger.Ledger{}
 	for _, source := range allSources {
 		fmt.Printf("getting entries from %s...\n", source.Name())

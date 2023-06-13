@@ -5,22 +5,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/andrewbenington/go-ledger/cmd/source/chase"
-	"github.com/andrewbenington/go-ledger/cmd/source/venmo"
+	"github.com/andrewbenington/go-ledger/chase"
 	"github.com/andrewbenington/go-ledger/ledger"
+	"github.com/andrewbenington/go-ledger/venmo"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
-
-func init() {
-	sources, err := LoadSources()
-	if err != nil {
-		log.Fatalf("Error loading sources: %s\n", err)
-	}
-	for _, source := range sources {
-		allSources[source.Name()] = source
-	}
-}
 
 var (
 	SourceCmd = &cobra.Command{
@@ -28,7 +18,7 @@ var (
 		Short: "Manage sources",
 		Long:  `go-ledger can pull transaction data from multiple sources`,
 	}
-	allSources map[string]Source = make(map[string]Source)
+	allSources []Source
 )
 
 type Source interface {
@@ -63,7 +53,6 @@ func LoadSources() ([]Source, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error parsing sources: %s", err)
 	}
-	allSources := []Source{}
 	for i := range sourcesConfig.Chase {
 		s := sourcesConfig.Chase[i]
 		err = s.Validate()
@@ -80,6 +69,5 @@ func LoadSources() ([]Source, error) {
 		}
 		allSources = append(allSources, &s)
 	}
-
 	return allSources, nil
 }

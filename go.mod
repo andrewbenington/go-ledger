@@ -7,6 +7,7 @@ require golang.org/x/text v0.9.0
 require (
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.3
+	github.com/xuri/excelize/v2 v2.7.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -23,7 +24,6 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/xuri/efp v0.0.0-20220603152613-6918739fd470 // indirect
-	github.com/xuri/excelize/v2 v2.7.1 // indirect
 	github.com/xuri/nfp v0.0.0-20220409054826-5e722a1d9e22 // indirect
 	golang.org/x/crypto v0.8.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
