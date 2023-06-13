@@ -23,7 +23,6 @@ var (
 func Assemble(cmd *cobra.Command, args []string) {
 	fmt.Println("ledger:")
 	l := LedgerFromSources()
-	fmt.Printf("%+v\n", len(l.Entries))
 	err := csv.WriteLedger(l, "ledger.csv")
 	if err != nil {
 		fmt.Println(err)

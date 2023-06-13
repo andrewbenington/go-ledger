@@ -54,7 +54,7 @@ func All() []Source {
 }
 
 func LoadSources() ([]Source, error) {
-	yamlFile, err := os.ReadFile("sources.yaml")
+	yamlFile, err := os.ReadFile("config/sources.yaml")
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
 	}

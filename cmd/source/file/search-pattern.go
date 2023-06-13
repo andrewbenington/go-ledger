@@ -51,14 +51,12 @@ func (f *SearchPattern) findFilesInDirectory(directory string) ([]string, error)
 		}
 		if len(f.FileNameKeywords) != 0 {
 			if keywordPattern.MatchString(file.Name()) {
-				fmt.Printf("Found file %s matching keyword in directory %s\n", file.Name(), globbedDir)
 				matchingFiles = append(matchingFiles, filepath.Join(globbedDir, file.Name()))
 				continue
 			}
 		}
 		for _, pattern := range f.FileNamePatterns {
 			if pattern.MatchString(file.Name()) {
-				fmt.Printf("Found file %s matching pattern %s in directory %s\n", file.Name(), pattern.String(), globbedDir)
 				matchingFiles = append(matchingFiles, filepath.Join(globbedDir, file.Name()))
 				break
 			}

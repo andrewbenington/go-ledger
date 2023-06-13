@@ -29,9 +29,13 @@ func autoComplete(cmd *cobra.Command, args []string, toComplete string) ([]strin
 }
 
 func CheckLabel(cmd *cobra.Command, args []string) {
-	if label, ok := allLabels[args[0]]; ok {
-		for _, keyword := range label.Keywords {
-			fmt.Println(keyword)
+	var label Label
+	for _, label = range allLabels {
+		if label.Name == args[0] {
+			break
 		}
+	}
+	for _, keyword := range label.Keywords {
+		fmt.Println(keyword)
 	}
 }

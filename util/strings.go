@@ -23,7 +23,6 @@ func ExtractDateFromTitle(title string) (month int, day int) {
 	if len(submatches) == 3 {
 		month, _ = strconv.Atoi(submatches[1])
 		day, _ = strconv.Atoi(submatches[2])
-		// fmt.Printf("found date %d/%d in %s\n", month, day, title)
 	}
 	return
 }

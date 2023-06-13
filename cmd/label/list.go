@@ -20,7 +20,7 @@ func init() {
 
 func ListLabels(cmd *cobra.Command, args []string) {
 	fmt.Println("labels:")
-	for labelName := range allLabels {
-		fmt.Println(labelName)
+	for _, label := range allLabels {
+		fmt.Printf("%s | %s\n", label.Name, label.re)
 	}
 }

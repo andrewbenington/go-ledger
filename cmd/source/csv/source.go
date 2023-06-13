@@ -44,7 +44,7 @@ func (s *Source) GetLedgerEntries() ([]ledger.LedgerEntry, error) {
 	}
 	ledgerEntries := []ledger.LedgerEntry{}
 	for _, path := range filePaths {
-		fmt.Printf("Reading file %s...\n", path)
+		fmt.Printf("\tReading file %s...\n", path)
 		fileEntries, err := s.LedgerEntriesFromFile(path)
 		if err != nil {
 			fmt.Println(err)

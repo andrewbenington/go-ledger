@@ -76,7 +76,6 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func PostProcessEntry(entry *ledger.LedgerEntry, row []string, accountHolder string) error {
-	fmt.Printf("%+v, %s, %s, %s\n", entry, accountHolder, row[6], row[7])
 	// if payment, use "To" column
 	if entry.Person == accountHolder {
 		entry.Person = row[7]

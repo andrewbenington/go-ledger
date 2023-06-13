@@ -2,6 +2,7 @@ package chase
 
 import (
 	"fmt"
+	"hash/fnv"
 	"regexp"
 	"time"
 
@@ -48,7 +49,6 @@ func (s *Source) Validate() error {
 	if len(s.LastDigits) != 4 || !FourDigitPattern.MatchString(s.LastDigits) {
 		return fmt.Errorf("Chase CSV source validation: last_four_digits must be exactly four digits")
 	}
-	fmt.Println(s)
 	if s.AccountType != "credit" && s.AccountType != "non-credit" {
 		return fmt.Errorf("Chase CSV source validation: account_type must be 'credit' or 'non-credit'")
 	}
@@ -103,5 +103,13 @@ func PostProcessEntry(entry *ledger.LedgerEntry, row []string) error {
 	if month > 0 && day > 0 {
 		entry.Date = time.Date(entry.Date.Year(), time.Month(month), day, 0, 0, 0, 0, time.UTC)
 	}
+	entry.ID = hashEntry(entry)
 	return nil
+}
+
+func hashEntry(entry *ledger.LedgerEntry) string {
+	str := fmt.Sprintf("%s_%f", entry.Date.Format(DATE_FORMAT), entry.Balance)
+	algorithm := fnv.New32a()
+	algorithm.Write([]byte(str))
+	return fmt.Sprintf("%d", algorithm.Sum32())
 }

@@ -17,6 +17,7 @@ import (
 type Label struct {
 	Name     string
 	Keywords []string
+	re       *regexp.Regexp
 }
 
 var (
@@ -27,8 +28,7 @@ var (
 		You can set a list of keywords for a given label, and transactions with any of those
 		keywords will be assigned that label.`,
 	}
-	allLabels       map[string]Label          = make(map[string]Label)
-	allLabelRegExps map[string]*regexp.Regexp = make(map[string]*regexp.Regexp)
+	allLabels []Label = []Label{}
 )
 
 func init() {
@@ -37,18 +37,18 @@ func init() {
 		fmt.Printf("Error loading labels: %s", err)
 		return
 	}
-	for _, label := range *labels {
-		allLabels[label.Name] = label
-		re, err := label.RegExp()
+	allLabels = labels
+	for i := range allLabels {
+		re, err := allLabels[i].RegExp()
 		if err != nil {
 			fmt.Printf("Error loading labels: %s", err)
 			continue
 		}
-		allLabelRegExps[label.Name] = re
+		allLabels[i].re = re
 	}
 }
 
-func All() map[string]Label {
+func All() []Label {
 	return allLabels
 }
 
@@ -63,13 +63,13 @@ func (l *Label) RegExp() (*regexp.Regexp, error) {
 	return regexp.Compile(reString)
 }
 
-func loadLabels() (*[]Label, error) {
-	yamlFile, err := os.ReadFile("labels.yaml")
+func loadLabels() ([]Label, error) {
+	yamlFile, err := os.ReadFile("config/labels.yaml")
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
 	}
-	labels := &[]Label{}
-	err = yaml.Unmarshal(yamlFile, labels)
+	labels := []Label{}
+	err = yaml.Unmarshal(yamlFile, &labels)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing labels: %s", err)
 	}
@@ -78,9 +78,9 @@ func loadLabels() (*[]Label, error) {
 }
 
 func FindLabel(memo string) string {
-	for labelName, labelRegExp := range allLabelRegExps {
-		if labelRegExp.MatchString(strings.ToLower(memo)) {
-			return labelName
+	for _, label := range allLabels {
+		if label.re != nil && label.re.MatchString(strings.ToLower(memo)) {
+			return label.Name
 		}
 	}
 	return ""
