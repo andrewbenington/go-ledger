@@ -137,7 +137,7 @@ func writeHeaderRow(file *excelize.File, sheet string) error {
 	return nil
 }
 
-func writeEntryRow(file *excelize.File, sheet string, row int, entry ledger.LedgerEntry) error {
+func writeEntryRow(file *excelize.File, sheet string, row int, entry ledger.Entry) error {
 	cell, err := excelize.CoordinatesToCellName(ledger.ID_COLUMN+1, row+2)
 	if err == nil {
 		err = file.SetCellValue(sheet, cell, entry.ID)

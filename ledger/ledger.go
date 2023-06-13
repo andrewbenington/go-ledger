@@ -1,10 +1,10 @@
 package ledger
 
 type Ledger struct {
-	Entries []LedgerEntry
+	Entries []Entry
 }
 
-func (l *Ledger) InsertEntries(entries []LedgerEntry) {
+func (l *Ledger) InsertEntries(entries []Entry) {
 	l.Entries = append(l.Entries, entries...)
 }
 

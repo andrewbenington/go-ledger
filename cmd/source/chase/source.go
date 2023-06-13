@@ -55,7 +55,7 @@ func (s *Source) Validate() error {
 	return nil
 }
 
-func (s *Source) GetLedgerEntries() ([]ledger.LedgerEntry, error) {
+func (s *Source) GetLedgerEntries() ([]ledger.Entry, error) {
 	return s.csvSource.GetLedgerEntries()
 }
 
@@ -98,7 +98,7 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-func PostProcessEntry(entry *ledger.LedgerEntry, row []string) error {
+func PostProcessEntry(entry *ledger.Entry, row []string) error {
 	month, day := util.ExtractDateFromTitle(entry.Memo)
 	if month > 0 && day > 0 {
 		entry.Date = time.Date(entry.Date.Year(), time.Month(month), day, 0, 0, 0, 0, time.UTC)
@@ -107,7 +107,7 @@ func PostProcessEntry(entry *ledger.LedgerEntry, row []string) error {
 	return nil
 }
 
-func hashEntry(entry *ledger.LedgerEntry) string {
+func hashEntry(entry *ledger.Entry) string {
 	str := fmt.Sprintf("%s_%f", entry.Date.Format(DATE_FORMAT), entry.Balance)
 	algorithm := fnv.New32a()
 	algorithm.Write([]byte(str))

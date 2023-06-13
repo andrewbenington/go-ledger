@@ -2,7 +2,7 @@ package ledger
 
 import "time"
 
-type LedgerEntry struct {
+type Entry struct {
 	ID      string
 	Date    time.Time
 	Source  string
@@ -15,8 +15,8 @@ type LedgerEntry struct {
 	Notes   string
 }
 
-func EmptyEntry() *LedgerEntry {
-	return &LedgerEntry{
+func EmptyEntry() *Entry {
+	return &Entry{
 		Value:   -1,
 		Balance: -1,
 	}

@@ -46,7 +46,7 @@ func (s *Source) Validate() error {
 	return nil
 }
 
-func (s *Source) GetLedgerEntries() ([]ledger.LedgerEntry, error) {
+func (s *Source) GetLedgerEntries() ([]ledger.Entry, error) {
 	return s.csvSource.GetLedgerEntries()
 }
 
@@ -65,7 +65,7 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	s.AccountHolderName = fields.AccountHolderName
 	s.Directories = fields.Directories
 	s.csvSource = CSVSource
-	s.csvSource.PostProcessEntry = func(entry *ledger.LedgerEntry, row []string) error {
+	s.csvSource.PostProcessEntry = func(entry *ledger.Entry, row []string) error {
 		return PostProcessEntry(entry, row, s.AccountHolderName)
 	}
 	s.csvSource.FileSearchPattern = file.SearchPattern{
@@ -75,7 +75,7 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-func PostProcessEntry(entry *ledger.LedgerEntry, row []string, accountHolder string) error {
+func PostProcessEntry(entry *ledger.Entry, row []string, accountHolder string) error {
 	// if payment, use "To" column
 	if entry.Person == accountHolder {
 		entry.Person = row[7]

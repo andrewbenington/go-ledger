@@ -20,7 +20,7 @@ type Source struct {
 	FooterRows      int    `yaml:"header_rows"`
 	OrderDescending bool   `yaml:"order_descending"`
 	// called after the entry has been populated with defined columns
-	PostProcessEntry  func(*ledger.LedgerEntry, []string) error
+	PostProcessEntry  func(*ledger.Entry, []string) error
 	FileSearchPattern file.SearchPattern
 }
 
@@ -37,12 +37,12 @@ type ColumnFormat struct {
 	Others  []int
 }
 
-func (s *Source) GetLedgerEntries() ([]ledger.LedgerEntry, error) {
+func (s *Source) GetLedgerEntries() ([]ledger.Entry, error) {
 	filePaths, err := s.FileSearchPattern.FindMatchingFiles()
 	if err != nil {
 		return nil, fmt.Errorf("error finding files for source %s: %w\n", s.SourceName, err)
 	}
-	ledgerEntries := []ledger.LedgerEntry{}
+	ledgerEntries := []ledger.Entry{}
 	for _, path := range filePaths {
 		fmt.Printf("\tReading file %s...\n", path)
 		fileEntries, err := s.LedgerEntriesFromFile(path)
@@ -55,7 +55,7 @@ func (s *Source) GetLedgerEntries() ([]ledger.LedgerEntry, error) {
 	return ledgerEntries, nil
 }
 
-func (s *Source) LedgerEntriesFromFile(filename string) ([]ledger.LedgerEntry, error) {
+func (s *Source) LedgerEntriesFromFile(filename string) ([]ledger.Entry, error) {
 	csvFile, err := os.Open(filename)
 	if err != nil {
 		return nil, fmt.Errorf("Error opening CSV file: %s", err)
@@ -69,7 +69,7 @@ func (s *Source) LedgerEntriesFromFile(filename string) ([]ledger.LedgerEntry, e
 		return nil, fmt.Errorf("Error reading CSV records: %s", err)
 	}
 
-	entries := []ledger.LedgerEntry{}
+	entries := []ledger.Entry{}
 	for i, row := range records {
 		if i >= len(records)-s.FooterRows {
 			break
@@ -87,7 +87,7 @@ func (s *Source) LedgerEntriesFromFile(filename string) ([]ledger.LedgerEntry, e
 			}
 			entry.Label = label.FindLabel(entry.Memo)
 			if s.OrderDescending {
-				entries = append([]ledger.LedgerEntry{*entry}, entries...)
+				entries = append([]ledger.Entry{*entry}, entries...)
 			} else {
 				entries = append(entries, *entry)
 			}
@@ -96,7 +96,7 @@ func (s *Source) LedgerEntriesFromFile(filename string) ([]ledger.LedgerEntry, e
 	return entries, nil
 }
 
-func (s *Source) fillDefinedColumns(entry *ledger.LedgerEntry, row []string) (err error) {
+func (s *Source) fillDefinedColumns(entry *ledger.Entry, row []string) (err error) {
 	if s.Columns.ID > 0 {
 		entry.ID = util.NormalizeUnicode(row[s.Columns.ID-1])
 	}

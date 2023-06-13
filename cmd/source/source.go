@@ -33,7 +33,7 @@ var (
 
 type Source interface {
 	Name() string
-	GetLedgerEntries() ([]ledger.LedgerEntry, error)
+	GetLedgerEntries() ([]ledger.Entry, error)
 }
 
 type FileSource interface {
