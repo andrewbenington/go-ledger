@@ -7,21 +7,20 @@ import (
 
 type Ledger struct {
 	entries  []Entry
-	entryMap map[string]int
+	entryMap map[string]*Entry
 }
 
 func (l *Ledger) InsertEntries(entries []Entry) {
 	if l.entryMap == nil {
-		l.entryMap = make(map[string]int)
+		l.entryMap = make(map[string]*Entry)
 	}
-	for _, entry := range entries {
-		if i, ok := l.entryMap[entry.ID]; !ok {
-			l.entryMap[entry.ID] = len(l.entries)
-			l.entries = append(l.entries, entry)
-		} else if l.entries[i].Label == "" && entry.Label != "" {
-			l.entries[i].Label = entry.Label
-			fmt.Println(l.entries[i].Label)
-
+	for _, e := range entries {
+		if existingEntry, ok := l.entryMap[e.ID]; !ok {
+			newEntry := e
+			l.entries = append(l.entries, newEntry)
+			l.entryMap[newEntry.ID] = &newEntry
+		} else if existingEntry.Label == "" && e.Label != "" {
+			existingEntry.Label = e.Label
 		}
 	}
 }
