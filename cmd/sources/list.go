@@ -1,8 +1,9 @@
-package source
+package sources
 
 import (
 	"fmt"
 
+	"github.com/andrewbenington/go-ledger/config"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,7 @@ func init() {
 
 func ListSources(cmd *cobra.Command, args []string) {
 	fmt.Println("sources:")
-	for labelName := range allSources {
+	for labelName := range config.Sources() {
 		fmt.Println(labelName)
 	}
 }

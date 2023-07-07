@@ -20,6 +20,10 @@ type Label struct {
 	re       *regexp.Regexp
 }
 
+const (
+	filename = "config/labels.yaml"
+)
+
 var (
 	LabelCmd = &cobra.Command{
 		Use:   "label",
@@ -53,6 +57,9 @@ func All() []Label {
 }
 
 func (l *Label) RegExp() (*regexp.Regexp, error) {
+	if len(l.Keywords) == 0 {
+		return nil, nil
+	}
 	reString := ""
 	for i, keyword := range l.Keywords {
 		if i > 0 {
@@ -75,6 +82,14 @@ func loadLabels() ([]Label, error) {
 	}
 
 	return labels, nil
+}
+
+func saveLabels() error {
+	rawString, err := yaml.Marshal(allLabels)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filename, rawString, 0755)
 }
 
 func FindLabel(memo string) string {

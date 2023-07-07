@@ -75,7 +75,7 @@ func (s *Source) LedgerEntriesFromFile(filename string) ([]ledger.Entry, error) 
 			break
 		}
 		if i > s.HeaderRows {
-			entry := ledger.EmptyEntry()
+			entry := &ledger.Entry{}
 			entry.Source = s.SourceName
 			err := s.fillDefinedColumns(entry, row)
 			if err != nil {

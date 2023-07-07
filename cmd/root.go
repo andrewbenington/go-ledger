@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/andrewbenington/go-ledger/cmd/assemble"
 	"github.com/andrewbenington/go-ledger/cmd/label"
-	"github.com/andrewbenington/go-ledger/cmd/source"
+	"github.com/andrewbenington/go-ledger/cmd/sources"
 	"github.com/spf13/cobra"
 )
 
@@ -34,6 +35,15 @@ func Execute() {
 	}
 }
 
+func ExecuteArgs(args []string) {
+	fmt.Println(args)
+	rootCmd.SetArgs(args)
+	err := rootCmd.Execute()
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
@@ -45,6 +55,6 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.AddCommand(label.LabelCmd)
-	rootCmd.AddCommand(source.SourceCmd)
+	rootCmd.AddCommand(sources.SourceCmd)
 	rootCmd.AddCommand(assemble.AssembleCmd)
 }

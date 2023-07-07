@@ -10,6 +10,10 @@ build:
 lint:
 	golangci-lint run
 
+.PHONY: clean
+clean:
+	rm -f ./*.xlsx
+
 .PHONY: deps
 deps:
 	go get ./...

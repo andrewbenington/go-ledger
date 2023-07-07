@@ -14,10 +14,3 @@ type Entry struct {
 	Label   string
 	Notes   string
 }
-
-func EmptyEntry() *Entry {
-	return &Entry{
-		Value:   -1,
-		Balance: -1,
-	}
-}
