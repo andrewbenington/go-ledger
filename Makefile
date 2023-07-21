@@ -12,7 +12,9 @@ lint:
 
 .PHONY: clean
 clean:
-	rm -f ./*.xlsx
+	@rm -f ./*.log
+	@touch error.log
+	@touch go-ledger.log
 
 .PHONY: deps
 deps:

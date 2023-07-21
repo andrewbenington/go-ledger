@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/csv"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -35,7 +36,17 @@ func ParseMoneyAmount(s string) (float64, error) {
 	}
 	f, err := strconv.ParseFloat(trimmed, 64)
 	if err != nil {
-		fmt.Println(trimmed)
+		fmt.Println(err, trimmed)
 	}
 	return f, err
+}
+
+func SplitWordsIgnoreQuotes(s string) ([]string, error) {
+	r := csv.NewReader(strings.NewReader(s))
+	r.Comma = ' ' // space
+	words, err := r.Read()
+	if err != nil {
+		return nil, err
+	}
+	return words, nil
 }

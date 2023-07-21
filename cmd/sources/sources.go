@@ -1,11 +1,14 @@
 package sources
 
-import "github.com/spf13/cobra"
+import "github.com/andrewbenington/go-ledger/cmd/command"
 
 var (
-	SourceCmd = &cobra.Command{
-		Use:   "source",
+	SourceCmd = &command.Command{
+		Name:  "source",
 		Short: "Manage sources",
 		Long:  `go-ledger can pull transaction data from multiple sources`,
+		SubCommands: []*command.Command{
+			ListCommand,
+		},
 	}
 )

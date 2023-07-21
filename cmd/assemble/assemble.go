@@ -5,38 +5,46 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/andrewbenington/go-ledger/cmd/command"
 	"github.com/andrewbenington/go-ledger/config"
 	"github.com/andrewbenington/go-ledger/excel"
 	"github.com/andrewbenington/go-ledger/ledger"
-	"github.com/spf13/cobra"
 )
 
 var (
-	AssembleCmd = &cobra.Command{
-		Use:   "assemble",
+	AssembleCmd = &command.Command{
+		Name:  "assemble",
 		Short: "Assemble ledger from sources",
 		Long:  `go-ledger will compile a ledger from the sources specified`,
-		Run:   Assemble,
+		ExpectedArgs: []command.ArgOptions{
+			{Name: "Years (Comma-separated)"},
+		},
+		Run:        Assemble,
+		ShowOutput: true,
 	}
 )
 
-func Assemble(cmd *cobra.Command, args []string) {
+func Assemble(args []string) ([]command.Output, error) {
 	l := &ledger.Ledger{}
+	cfg := config.GetConfig()
+	if len(cfg.Sources.Venmo) > 0 {
+
+	}
 	if len(args) > 0 {
-		l = ReadLedger(args)
+		PopulateLedger(l, args)
 	}
-	l.UpdateFromSources(config.Sources())
-	// err := csv.WriteLedger(l, "ledger.csv")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	err := excel.WriteLedger(*l)
+	err := l.UpdateFromSources(config.Sources())
 	if err != nil {
-		fmt.Println(err)
+		return []command.Output{}, err
 	}
+	successOutput := command.Output{
+		String:    "Successfully Assembled",
+		IsMessage: true,
+	}
+	return []command.Output{successOutput}, excel.WriteLedger(*l)
 }
 
-func ReadLedger(args []string) *ledger.Ledger {
+func PopulateLedger(l *ledger.Ledger, args []string) *ledger.Ledger {
 	years := []int{}
 	for _, arg := range args {
 		year, err := strconv.Atoi(arg)
@@ -44,7 +52,7 @@ func ReadLedger(args []string) *ledger.Ledger {
 			years = append(years, year)
 		}
 	}
-	l, err := excel.ReadLedger(years)
+	err := excel.PopulateLedger(l, years)
 	if err != nil {
 		fmt.Printf("error loading sources: %s", err)
 		os.Exit(1)

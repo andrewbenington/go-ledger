@@ -33,7 +33,6 @@ func ReadConfig() error {
 
 func Sources() []ledger.Source {
 	err := ReadConfig()
-	fmt.Printf("config: %+v\n", config)
 	if err != nil {
 		log.Fatalf("could not read config: %s", err)
 	}

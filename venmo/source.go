@@ -1,7 +1,6 @@
 package venmo
 
 import (
-	"fmt"
 	"regexp"
 
 	"github.com/andrewbenington/go-ledger/csv"
@@ -57,7 +56,6 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		Directories       []string `yaml:"directories"`
 	}{}
 	err := unmarshal(&fields)
-	fmt.Println(fields.AccountHolderName)
 	if err != nil {
 		return err
 	}

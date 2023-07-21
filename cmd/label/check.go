@@ -1,41 +1,30 @@
 package label
 
 import (
-	"fmt"
-
-	"github.com/spf13/cobra"
+	"github.com/andrewbenington/go-ledger/cmd/command"
 )
 
 var (
-	CheckCommand = &cobra.Command{
-		Use:               "check",
-		Short:             "check label keywords",
-		Run:               CheckLabel,
-		ValidArgsFunction: autoComplete,
-		Args:              cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
+	CheckCommand = &command.Command{
+		Name:  "check",
+		Short: "check label keywords",
+		ExpectedArgs: []command.ArgOptions{
+			{Name: "Label", AutoComplete: autoCompleteLabel},
+		},
+		Run: CheckLabel,
 	}
 )
 
-func init() {
-	LabelCmd.AddCommand(CheckCommand)
-}
-
-func autoComplete(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	labelNames := []string{}
-	for _, l := range allLabels {
-		labelNames = append(labelNames, l.Name)
-	}
-	return labelNames, cobra.ShellCompDirectiveNoFileComp
-}
-
-func CheckLabel(cmd *cobra.Command, args []string) {
+func CheckLabel(args []string) ([]command.Output, error) {
 	var label Label
 	for _, label = range allLabels {
 		if label.Name == args[0] {
 			break
 		}
 	}
+	outputs := []command.Output{}
 	for _, keyword := range label.Keywords {
-		fmt.Println(keyword)
+		outputs = append(outputs, command.Output{String: keyword})
 	}
+	return outputs, nil
 }

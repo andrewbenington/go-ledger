@@ -10,8 +10,7 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func ReadLedger(years []int) (*ledger.Ledger, error) {
-	l := &ledger.Ledger{}
+func PopulateLedger(l *ledger.Ledger, years []int) error {
 	for _, year := range years {
 		filename := fmt.Sprintf("%d.xlsx", year)
 		if _, err := os.Stat(filename); err != nil {
@@ -20,11 +19,11 @@ func ReadLedger(years []int) (*ledger.Ledger, error) {
 		}
 		entries, err := ledgerEntriesFromFile(filename)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		l.InsertEntries(entries)
 	}
-	return l, nil
+	return nil
 }
 
 func ledgerEntriesFromFile(filename string) ([]ledger.Entry, error) {

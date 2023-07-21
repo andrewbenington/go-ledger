@@ -1,26 +1,31 @@
 package label
 
 import (
-	"fmt"
-
-	"github.com/spf13/cobra"
+	"github.com/andrewbenington/go-ledger/cmd/command"
 )
 
 var (
-	ListCommand = &cobra.Command{
-		Use:   "list",
+	ListCommand = &command.Command{
+		Name:  "list",
 		Short: "list existing labels",
 		Run:   ListLabels,
 	}
 )
 
-func init() {
-	LabelCmd.AddCommand(ListCommand)
-}
-
-func ListLabels(cmd *cobra.Command, args []string) {
-	fmt.Println("labels:")
+func ListLabels(args []string) ([]command.Output, error) {
+	outputs := []command.Output{}
 	for _, label := range allLabels {
-		fmt.Printf("%s | %s\n", label.Name, label.re)
+		outputs = append(outputs, command.Output{
+			String: label.Name,
+			Options: []command.OutputOption{
+				{
+					Name:   "View",
+					Select: CheckCommand,
+					Args:   []string{label.Name},
+				},
+			},
+		})
+
 	}
+	return outputs, nil
 }

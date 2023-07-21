@@ -2,12 +2,15 @@ package ledger
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 )
 
 type Ledger struct {
-	entries  []Entry
-	entryMap map[string]*Entry
+	entries    []Entry
+	entryMap   map[string]*Entry
+	patternMap map[*regexp.Regexp][]*Entry
+	labelMap   map[string][]*Entry
 }
 
 func (l *Ledger) InsertEntries(entries []Entry) {
@@ -16,9 +19,8 @@ func (l *Ledger) InsertEntries(entries []Entry) {
 	}
 	for _, e := range entries {
 		if existingEntry, ok := l.entryMap[e.ID]; !ok {
-			newEntry := e
-			l.entries = append(l.entries, newEntry)
-			l.entryMap[newEntry.ID] = &newEntry
+			l.entries = append(l.entries, e)
+			l.entryMap[e.ID] = &l.entries[len(l.entries)-1]
 		} else if existingEntry.Label == "" && e.Label != "" {
 			existingEntry.Label = e.Label
 		}
@@ -53,4 +55,18 @@ func (l *Ledger) UpdateFromSources(allSources []Source) error {
 
 func (l *Ledger) Entries() []Entry {
 	return l.entries
+}
+
+func (l *Ledger) TrackPattern(re *regexp.Regexp) {
+	l.patternMap[re] = []*Entry{}
+	for i := range l.entries {
+		entry := &l.entries[i]
+		if re.MatchString(entry.Memo) {
+			l.patternMap[re] = append(l.patternMap[re], entry)
+		}
+	}
+}
+
+func (l *Ledger) EntriesWithPattern(re *regexp.Regexp) []*Entry {
+	return l.patternMap[re]
 }

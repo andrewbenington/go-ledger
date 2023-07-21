@@ -1,60 +1,45 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/andrewbenington/go-ledger/cmd/assemble"
+	"github.com/andrewbenington/go-ledger/cmd/command"
 	"github.com/andrewbenington/go-ledger/cmd/label"
 	"github.com/andrewbenington/go-ledger/cmd/sources"
 	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "go-ledger",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+var rootCmd = &command.Command{
+	Name:  "go-ledger",
+	Short: "application for managing transactions and budgets",
+	Long: `Go-Ledger manages a history of transactions. It can automatically import, label, and de-duplicate transactions
+	from source CSV files.`,
+	SubCommands: []*command.Command{
+		label.LabelCmd, assemble.AssembleCmd, sources.SourceCmd,
+	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
-	ValidArgs: []string{"bash", "zsh", "fish", "powershell"},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := rootCmd.Execute()
+	err := rootCmd.ToCobra().Execute()
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
-func ExecuteArgs(args []string) {
-	fmt.Println(args)
-	rootCmd.SetArgs(args)
-	err := rootCmd.Execute()
-	if err != nil {
-		fmt.Println(err)
-	}
+func GetCommand() *command.Command {
+	return rootCmd
 }
 
-func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.go-ledger.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	rootCmd.AddCommand(label.LabelCmd)
-	rootCmd.AddCommand(sources.SourceCmd)
-	rootCmd.AddCommand(assemble.AssembleCmd)
+func resetAllFlags(cmd *cobra.Command) {
+	cmd.ResetFlags()
+	for _, c := range cmd.Commands() {
+		resetAllFlags(c)
+	}
 }
