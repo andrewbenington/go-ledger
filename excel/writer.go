@@ -9,12 +9,16 @@ import (
 )
 
 func WriteLedger(l ledger.Ledger) error {
+	if len(l.Entries()) == 0 {
+		return fmt.Errorf("no entries")
+	}
 	file := excelize.NewFile()
 	year := l.Entries()[0].Date.Year()
 	month := l.Entries()[0].Date.Month()
-	addMonthSheet(file, month.String())
+	addMonthSheet(file, month.String(), &l)
 	row := 0
-	for _, entry := range l.Entries() {
+	for i, entry := range l.Entries() {
+		fmt.Println("entry", i)
 		if entry.Date.Year() > year {
 			fmt.Printf("setting year to %d\n", entry.Date.Year())
 			err := saveAndCloseFile(file, fmt.Sprintf("%d", year))
@@ -24,7 +28,7 @@ func WriteLedger(l ledger.Ledger) error {
 			year = entry.Date.Year()
 			month = entry.Date.Month()
 			file = excelize.NewFile()
-			addMonthSheet(file, month.String())
+			addMonthSheet(file, month.String(), &l)
 		}
 		if entry.Date.Month() > month {
 			if row > 0 {
@@ -34,12 +38,12 @@ func WriteLedger(l ledger.Ledger) error {
 				}
 			}
 			month = entry.Date.Month()
-			addMonthSheet(file, month.String())
+			addMonthSheet(file, month.String(), &l)
 			row = 0
 		}
 		// fmt.Printf("setting sheet %s row at %s for %s\n", entry.Date.Month().String(), cell, entry.Memo)
 		// err = file.SetSheetRow(entry.Date.Month().String(), cell, &[]interface{}{entry.ID, entry.Date, entry.Source, entry.Person, entry.Memo, entry.Value, entry.Type, entry.Balance, entry.Label, entry.Notes})
-		err := writeEntryRow(file, row, entry)
+		err := writeEntryRow(file, row, entry, &l)
 		if err != nil {
 			_ = saveAndCloseFile(file, fmt.Sprintf("%d", year))
 			return fmt.Errorf("error writing entry row in %s %d: %w", entry.Date.Month().String(), year, err)
@@ -57,7 +61,7 @@ func WriteLedger(l ledger.Ledger) error {
 	return nil
 }
 
-func addMonthSheet(file *excelize.File, month string) error {
+func addMonthSheet(file *excelize.File, month string, l *ledger.Ledger) error {
 	_, err := file.NewSheet(month)
 	if err != nil {
 		return fmt.Errorf("error adding sheet for sheet %s: %w", month, err)
@@ -69,18 +73,18 @@ func addMonthSheet(file *excelize.File, month string) error {
 			return fmt.Errorf("error deleting placeholder Sheet1: %w", err)
 		}
 	}
-	err = writeHeaderRow(file, month)
+	err = writeHeaderRow(file, month, l)
 	if err != nil {
 		return fmt.Errorf("error writing headers for sheet %s: %w", month, err)
 	}
-	err = setColumnWidths(file, month)
+	err = setColumnWidths(file, month, l)
 	if err != nil {
 		return fmt.Errorf("error setting column widths for sheet %s: %w", month, err)
 	}
 	return nil
 }
 
-func writeHeaderRow(file *excelize.File, sheet string) error {
+func writeHeaderRow(file *excelize.File, sheet string, l *ledger.Ledger) error {
 	for columnIndex, fieldName := range ledger.Columns {
 		cell, err := excelize.CoordinatesToCellName(columnIndex+1, 1)
 		if err == nil {
@@ -93,14 +97,20 @@ func writeHeaderRow(file *excelize.File, sheet string) error {
 	return nil
 }
 
-func writeEntryRow(file *excelize.File, row int, entry ledger.Entry) error {
+func writeEntryRow(file *excelize.File, row int, entry ledger.Entry, l *ledger.Ledger) error {
 	for columnIndex, fieldName := range ledger.Columns {
+		fname := fieldName
 		cell, err := excelize.CoordinatesToCellName(columnIndex+1, row+2)
 		if err != nil {
 			return fmt.Errorf("Error getting cell name for %d,%d: %w", columnIndex+1, 1, err)
 		}
+		if fname == "Source Name" {
+			fname = "SourceName"
+		} else if fname == "Source Type" {
+			fname = "SourceType"
+		}
 		refVal := reflect.ValueOf(entry)
-		field := refVal.FieldByName(fieldName)
+		field := refVal.FieldByName(fname)
 		if !field.IsValid() {
 			continue
 		}
@@ -123,15 +133,15 @@ func saveAndCloseFile(f *excelize.File, filename string) error {
 	return f.Close()
 }
 
-func setColumnWidths(file *excelize.File, sheetName string) error {
-	dateColumn, err := excelize.ColumnNumberToName(ledger.DATE_COLUMN)
+func setColumnWidths(file *excelize.File, sheetName string, l *ledger.Ledger) error {
+	dateColumn, err := excelize.ColumnNumberToName(ledger.DateIndex + 1)
 	if err == nil {
 		err = file.SetColWidth(sheetName, dateColumn, dateColumn, 15)
 		if err != nil {
 			return err
 		}
 	}
-	memoColumn, err := excelize.ColumnNumberToName(ledger.MEMO_COLUMN)
+	memoColumn, err := excelize.ColumnNumberToName(ledger.MemoIndex + 1)
 	if err == nil {
 		err = file.SetColWidth(sheetName, memoColumn, memoColumn, 70)
 		if err != nil {
@@ -146,15 +156,11 @@ func addPivotTable(file *excelize.File, sheet string, rowCount int) error {
 	if err != nil {
 		return fmt.Errorf("error getting first column: %w", err)
 	}
-	lastDataColumn := ledger.LABEL_COLUMN
-	if ledger.VALUE_COLUMN > lastDataColumn {
-		lastDataColumn = ledger.VALUE_COLUMN
-	}
-	lastDataCell, err := excelize.CoordinatesToCellName(lastDataColumn, rowCount+1)
+	lastDataCell, err := excelize.CoordinatesToCellName(ledger.FieldCount-1, rowCount+1)
 	if err != nil {
 		return fmt.Errorf("error getting last column: %w", err)
 	}
-	firstPivotCell, err := excelize.CoordinatesToCellName(ledger.SWAP_TABLE_START_COLUMN, 1)
+	firstPivotCell, err := excelize.CoordinatesToCellName(ledger.SwapTableStart, 1)
 	if err != nil {
 		return fmt.Errorf("error getting first pivot column: %w", err)
 	}

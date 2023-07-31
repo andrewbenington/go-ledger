@@ -5,41 +5,41 @@ import (
 	"os"
 	"time"
 
+	"github.com/andrewbenington/go-ledger/config"
 	"github.com/andrewbenington/go-ledger/ledger"
 	"github.com/andrewbenington/go-ledger/util"
 	"github.com/xuri/excelize/v2"
 )
 
-func PopulateLedger(l *ledger.Ledger, years []int) error {
-	for _, year := range years {
-		filename := fmt.Sprintf("%d.xlsx", year)
-		if _, err := os.Stat(filename); err != nil {
-			// file doesn't exist yet
-			continue
-		}
-		entries, err := ledgerEntriesFromFile(filename)
-		if err != nil {
-			return err
-		}
-		l.InsertEntries(entries)
+// LedgerFromFile will return a pointer to a ledger.Ledger, including entries
+// from the excel file named for the given year
+func LedgerFromFile(year int) (*ledger.Ledger, error) {
+	filename := fmt.Sprintf("%d.xlsx", year)
+	l := &ledger.Ledger{Year: year}
+	if _, err := os.Stat(filename); err != nil {
+		// file doesn't exist yet
+		return l, nil
 	}
-	return nil
-}
-
-func ledgerEntriesFromFile(filename string) ([]ledger.Entry, error) {
 	file, err := excelize.OpenFile(filename)
 	if err != nil {
-		return nil, fmt.Errorf("error opening %s: %w", filename, err)
+		return nil, fmt.Errorf("open %s: %w", filename, err)
 	}
-	entries := []ledger.Entry{}
+	err = addEntriesFromFile(l, file)
+	if err != nil {
+		return nil, err
+	}
+	return l, nil
+}
+
+func addEntriesFromFile(l *ledger.Ledger, file *excelize.File) error {
 	for _, sheet := range file.GetSheetList() {
 		newEntries, err := ledgerEntriesFromSheet(file, sheet)
 		if err != nil {
-			return nil, fmt.Errorf("error reading %s: %w", filename, err)
+			return fmt.Errorf("read sheet %s: %w", sheet, err)
 		}
-		entries = append(entries, newEntries...)
+		l.InsertEntries(newEntries)
 	}
-	return entries, nil
+	return nil
 }
 
 func ledgerEntriesFromSheet(file *excelize.File, sheet string) ([]ledger.Entry, error) {
@@ -54,6 +54,10 @@ func ledgerEntriesFromSheet(file *excelize.File, sheet string) ([]ledger.Entry, 
 			fmt.Printf("error getting entry from from row %v: %s\n", row, err)
 			continue
 		}
+		cfg := config.GetConfig()
+		if cfg.General.Chase.IgnoreVenmo {
+
+		}
 		entries = append(entries, *entry)
 	}
 	return entries, nil
@@ -61,41 +65,44 @@ func ledgerEntriesFromSheet(file *excelize.File, sheet string) ([]ledger.Entry, 
 
 func ledgerEntryFromRow(row []string) (entry *ledger.Entry, err error) {
 	entry = &ledger.Entry{}
-	if len(row) > ledger.ID_COLUMN {
-		entry.ID = util.NormalizeUnicode(row[ledger.ID_COLUMN-1])
+	if len(row) > ledger.IDIndex {
+		entry.ID = util.NormalizeUnicode(row[ledger.IDIndex])
 	}
-	if len(row) > ledger.DATE_COLUMN {
-		entry.Date, err = time.Parse("1/2/06 03:04", row[ledger.DATE_COLUMN-1])
+	if len(row) > ledger.DateIndex {
+		entry.Date, err = time.Parse("1/2/06 03:04", row[ledger.DateIndex])
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing date: %s", err)
 		}
 	}
-	if len(row) > ledger.MEMO_COLUMN {
-		entry.Memo = util.NormalizeUnicode(row[ledger.MEMO_COLUMN-1])
+	if len(row) > ledger.MemoIndex {
+		entry.Memo = util.NormalizeUnicode(row[ledger.MemoIndex])
 	}
-	if len(row) > ledger.VALUE_COLUMN {
-		entry.Value, err = util.ParseMoneyAmount(row[ledger.VALUE_COLUMN-1])
+	if len(row) > ledger.ValueIndex {
+		entry.Value, err = util.ParseMoneyAmount(row[ledger.ValueIndex])
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing value amount: %s", err)
 		}
 	}
-	if len(row) > ledger.BALANCE_COLUMN {
-		entry.Balance, err = util.ParseMoneyAmount(row[ledger.BALANCE_COLUMN-1])
+	if len(row) > ledger.BalanceIndex {
+		entry.Balance, err = util.ParseMoneyAmount(row[ledger.BalanceIndex])
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing balance amount: %s", err)
 		}
 	}
-	if len(row) > ledger.TYPE_COLUMN {
-		entry.Type = util.NormalizeUnicode(row[ledger.TYPE_COLUMN-1])
+	if len(row) > ledger.TypeIndex {
+		entry.Type = util.NormalizeUnicode(row[ledger.TypeIndex])
 	}
-	if len(row) > ledger.SOURCE_COLUMN {
-		entry.Source = util.NormalizeUnicode(row[ledger.SOURCE_COLUMN-1])
+	if len(row) > ledger.SourceNameIndex {
+		entry.SourceName = util.NormalizeUnicode(row[ledger.SourceNameIndex])
 	}
-	if len(row) > ledger.PERSON_COLUMN {
-		entry.Person = util.NormalizeUnicode(row[ledger.PERSON_COLUMN-1])
+	if len(row) > ledger.SourceTypeIndex {
+		entry.SourceName = util.NormalizeUnicode(row[ledger.SourceTypeIndex])
 	}
-	if len(row) > ledger.LABEL_COLUMN {
-		entry.Label = util.NormalizeUnicode(row[ledger.LABEL_COLUMN-1])
+	if len(row) > ledger.PersonIndex {
+		entry.Person = util.NormalizeUnicode(row[ledger.PersonIndex])
+	}
+	if len(row) > ledger.LabelIndex {
+		entry.Label = util.NormalizeUnicode(row[ledger.LabelIndex])
 	}
 	return entry, nil
 }

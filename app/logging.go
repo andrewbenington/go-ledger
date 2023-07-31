@@ -5,11 +5,13 @@ import (
 	"os"
 )
 
-func log(content string, filepath string) {
-	filePath := "go-ledger.log"
+func logToFile(content string, filepath string) {
+	if filepath == "" {
+		filepath = "go-ledger.log"
+	}
 
 	// Open the file in append mode with write-only permissions
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile(filepath, os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return
 	}
@@ -23,15 +25,15 @@ func log(content string, filepath string) {
 }
 
 func LogErr(content string) {
-	log(content, "error.log")
+	logToFile(content, "error.log")
 }
 
 func Log(content string, args ...any) {
-	log(fmt.Sprintf(content, args...), "go-ledger.log")
+	logToFile(fmt.Sprintf(content, args...), "go-ledger.log")
 }
 
 func LogInterface(obj interface{}) {
-	log(fmt.Sprintf("%+v", obj), "go-ledger.log")
+	logToFile(fmt.Sprintf("%+v", obj), "go-ledger.log")
 }
 
 func LogStack() {
@@ -39,5 +41,5 @@ func LogStack() {
 	for _, cmd := range stack {
 		str += " " + cmd.Name
 	}
-	log(str, "go-ledger.log")
+	logToFile(str, "go-ledger.log")
 }

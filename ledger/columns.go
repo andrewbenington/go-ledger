@@ -1,31 +1,35 @@
 package ledger
 
 const (
-	ID_COLUMN               = 1
-	DATE_COLUMN             = 2
-	SOURCE_COLUMN           = 3
-	PERSON_COLUMN           = 4
-	MEMO_COLUMN             = 5
-	VALUE_COLUMN            = 6
-	TYPE_COLUMN             = 7
-	BALANCE_COLUMN          = 8
-	LABEL_COLUMN            = 9
-	NOTES_COLUMN            = 10
-	MAX_DATA_COLUMN         = 10
-	SWAP_TABLE_START_COLUMN = 12
+	IDIndex int = iota
+	DateIndex
+	SourceNameIndex
+	SourceTypeIndex
+	PersonIndex
+	MemoIndex
+	ValueIndex
+	TypeIndex
+	BalanceIndex
+	LabelIndex
+	NotesIndex
+	FieldCount
+	SwapTableStart
 )
 
 var (
-	Columns = []string{
-		"ID",
-		"Date",
-		"Source",
-		"Person",
-		"Memo",
-		"Value",
-		"Type",
-		"Balance",
-		"Label",
-		"Notes",
-	}
+	Columns = new([FieldCount]string)
 )
+
+func init() {
+	Columns[IDIndex] = "ID"
+	Columns[DateIndex] = "Date"
+	Columns[SourceNameIndex] = "Source Name"
+	Columns[SourceTypeIndex] = "Source Type"
+	Columns[PersonIndex] = "Person"
+	Columns[MemoIndex] = "Memo"
+	Columns[ValueIndex] = "Value"
+	Columns[TypeIndex] = "Type"
+	Columns[BalanceIndex] = "Balance"
+	Columns[LabelIndex] = "Label"
+	Columns[NotesIndex] = "Notes"
+}

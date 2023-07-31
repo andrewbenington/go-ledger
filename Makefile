@@ -1,5 +1,5 @@
 .PHONY: start
-start:
+start: clean
 	go run .
 
 .PHONY: build

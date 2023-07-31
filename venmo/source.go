@@ -10,6 +10,7 @@ import (
 
 const (
 	DATE_FORMAT = "2006-01-02T15:04:05"
+	SourceType  = "VENMO"
 )
 
 var (
@@ -34,6 +35,7 @@ type Source struct {
 	SourceName        string   `yaml:"name"`
 	AccountHolderName string   `yaml:"account_holder_name"`
 	Directories       []string `yaml:"directories"`
+	HideTransfers     bool     `yaml:"hide_transfers"`
 	csvSource         csv.Source
 }
 
@@ -45,8 +47,8 @@ func (s *Source) Validate() error {
 	return nil
 }
 
-func (s *Source) GetLedgerEntries() ([]ledger.Entry, error) {
-	return s.csvSource.GetLedgerEntries()
+func (s *Source) GetLedgerEntries(year int) ([]ledger.Entry, error) {
+	return s.csvSource.GetLedgerEntries(year)
 }
 
 func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -74,6 +76,7 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func PostProcessEntry(entry *ledger.Entry, row []string, accountHolder string) error {
+	entry.SourceType = SourceType
 	// if payment, use "To" column
 	if entry.Person == accountHolder {
 		entry.Person = row[7]

@@ -2,10 +2,13 @@ package app
 
 import (
 	"bufio"
+	"fmt"
+	"log"
 	"os"
 
 	"github.com/andrewbenington/go-ledger/cmd"
 	"github.com/andrewbenington/go-ledger/cmd/command"
+	"github.com/andrewbenington/go-ledger/config"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -17,12 +20,15 @@ var (
 )
 
 func Start() {
+	if err := config.ReadConfig(); err != nil {
+		log.Fatal(err)
+	}
 	app = tview.NewApplication()
 	view = tview.NewFrame(nil)
 	stack = []*command.Command{cmd.GetCommand()}
 	DoCommand(cmd.GetCommand())
 	app.SetRoot(view, true)
-	if err := captureFunctionErrors(app.Run); err != nil {
+	if err := app.Run(); err != nil {
 		panic(err)
 	}
 }
@@ -55,6 +61,7 @@ func PopStack() {
 
 func DoCommand(c *command.Command) {
 	Log("DoCommand %s", c.Name)
+	fmt.Fprintln(os.Stderr, "test error")
 	LogStack()
 	view.SetBorder(true).SetTitle(c.Name)
 	if len(c.SubCommands) > 0 {
@@ -175,16 +182,12 @@ func RunCommand(c *command.Command, args []string) {
 func RunCommandWithOutput(c *command.Command, args []string) {
 	Log("RunCommandWithOutput %s %+v", c.Name, args)
 	LogStack()
+	Log("stderr: %p", os.Stderr)
 	textView := tview.NewTextView().
 		SetDynamicColors(true).
 		SetScrollable(true).
 		SetChangedFunc(func() {
 			app.Draw()
-		}).
-		SetDoneFunc(func(key tcell.Key) {
-			if key == tcell.KeyEnter || key == tcell.KeyESC {
-				PopStack()
-			}
 		})
 	view.SetPrimitive(textView)
 
@@ -193,20 +196,32 @@ func RunCommandWithOutput(c *command.Command, args []string) {
 	os.Stdout = w
 
 	go func() {
+		defer func() {
+			r.Close()
+			w.Close()
+			os.Stdout = old
+		}()
 		output, err := c.Run(args)
-		r.Close()
-		w.Close()
-		os.Stdout = old
 		if err != nil {
 			output = []command.Output{{
 				IsMessage: true,
 				String:    err.Error(),
 			}}
 		}
-		// Queue because we aren't in main goroutine
+		_, err = w.WriteString("(Enter or ESC to continue)\n")
+		if err != nil {
+			LogErr(err.Error())
+		}
 		app.QueueUpdate(func() {
-			DisplayOutput(output)
+			textView.
+				SetDoneFunc(func(key tcell.Key) {
+					if key == tcell.KeyEnter || key == tcell.KeyESC {
+						// Queue because we aren't in main goroutine
+						DisplayOutput(output)
+					}
+				})
 		})
+
 	}()
 
 	// display standard out to screen

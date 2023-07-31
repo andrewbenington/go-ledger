@@ -7,6 +7,7 @@ import (
 )
 
 type Ledger struct {
+	Year       int
 	entries    []Entry
 	entryMap   map[string]*Entry
 	patternMap map[*regexp.Regexp][]*Entry
@@ -42,7 +43,7 @@ func (l Ledger) Swap(i, j int) {
 func (l *Ledger) UpdateFromSources(allSources []Source) error {
 	for _, source := range allSources {
 		fmt.Printf("getting entries from %s...\n", source.Name())
-		entries, err := source.GetLedgerEntries()
+		entries, err := source.GetLedgerEntries(l.Year)
 		if err != nil {
 			fmt.Printf("Error getting entries from %s: %e", source.Name(), err)
 			continue

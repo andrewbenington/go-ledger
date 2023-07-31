@@ -14,6 +14,7 @@ import (
 
 const (
 	DATE_FORMAT = "01/02/2006"
+	SourceType  = "CHASE"
 )
 
 var (
@@ -55,8 +56,8 @@ func (s *Source) Validate() error {
 	return nil
 }
 
-func (s *Source) GetLedgerEntries() ([]ledger.Entry, error) {
-	return s.csvSource.GetLedgerEntries()
+func (s *Source) GetLedgerEntries(year int) ([]ledger.Entry, error) {
+	return s.csvSource.GetLedgerEntries(year)
 }
 
 func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -99,6 +100,7 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func PostProcessEntry(entry *ledger.Entry, row []string) error {
+	entry.SourceType = SourceType
 	month, day := util.ExtractDateFromTitle(entry.Memo)
 	if month > 0 && day > 0 {
 		entry.Date = time.Date(entry.Date.Year(), time.Month(month), day, 0, 0, 0, 0, time.UTC)

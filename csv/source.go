@@ -37,7 +37,7 @@ type ColumnFormat struct {
 	Others  []int
 }
 
-func (s *Source) GetLedgerEntries() ([]ledger.Entry, error) {
+func (s *Source) GetLedgerEntries(year int) ([]ledger.Entry, error) {
 	filePaths, err := s.FileSearchPattern.FindMatchingFiles()
 	if err != nil {
 		return nil, fmt.Errorf("error finding files for source %s: %w\n", s.SourceName, err)
@@ -45,7 +45,7 @@ func (s *Source) GetLedgerEntries() ([]ledger.Entry, error) {
 	ledgerEntries := []ledger.Entry{}
 	for _, path := range filePaths {
 		fmt.Printf("\tReading file %s...\n", path)
-		fileEntries, err := s.LedgerEntriesFromFile(path)
+		fileEntries, err := s.LedgerEntriesFromFile(path, year)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -55,7 +55,7 @@ func (s *Source) GetLedgerEntries() ([]ledger.Entry, error) {
 	return ledgerEntries, nil
 }
 
-func (s *Source) LedgerEntriesFromFile(filename string) ([]ledger.Entry, error) {
+func (s *Source) LedgerEntriesFromFile(filename string, year int) ([]ledger.Entry, error) {
 	csvFile, err := os.Open(filename)
 	if err != nil {
 		return nil, fmt.Errorf("Error opening CSV file: %s", err)
@@ -76,7 +76,7 @@ func (s *Source) LedgerEntriesFromFile(filename string) ([]ledger.Entry, error) 
 		}
 		if i > s.HeaderRows {
 			entry := &ledger.Entry{}
-			entry.Source = s.SourceName
+			entry.SourceName = s.SourceName
 			err := s.fillDefinedColumns(entry, row)
 			if err != nil {
 				return nil, err
@@ -84,6 +84,9 @@ func (s *Source) LedgerEntriesFromFile(filename string) ([]ledger.Entry, error) 
 			err = s.PostProcessEntry(entry, row)
 			if err != nil {
 				return nil, err
+			}
+			if entry.Date.Year() != year {
+				continue
 			}
 			entry.Label = label.FindLabel(entry.Memo)
 			if s.OrderDescending {

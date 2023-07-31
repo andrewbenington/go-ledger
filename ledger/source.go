@@ -6,7 +6,7 @@ var (
 
 type Source interface {
 	Name() string
-	GetLedgerEntries() ([]Entry, error)
+	GetLedgerEntries(year int) ([]Entry, error)
 }
 
 type FileSource interface {

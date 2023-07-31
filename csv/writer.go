@@ -19,7 +19,7 @@ func WriteLedger(l ledger.Ledger, filename string) error {
 		return fmt.Errorf("error writing ledger header: %w", err)
 	}
 	for _, entry := range l.Entries() {
-		err = writer.Write([]string{entry.Date.String(), entry.Source, entry.Person, entry.Memo, fmt.Sprintf("%f", entry.Value), entry.Type, fmt.Sprintf("%f", entry.Balance), entry.Label, entry.Notes})
+		err = writer.Write([]string{entry.Date.String(), entry.SourceName, entry.SourceType, entry.Person, entry.Memo, fmt.Sprintf("%f", entry.Value), entry.Type, fmt.Sprintf("%f", entry.Balance), entry.Label, entry.Notes})
 		if err != nil {
 			return fmt.Errorf("error writing ledger entry row: %w", err)
 		}
