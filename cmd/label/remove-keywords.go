@@ -3,12 +3,10 @@ package label
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/andrewbenington/go-ledger/command"
 	"github.com/andrewbenington/go-ledger/ledger"
-	"github.com/rivo/tview"
 )
 
 var (
@@ -45,8 +43,8 @@ func RemoveLabelKeyword(args []string) ([]command.Output, error) {
 	return nil, fmt.Errorf("that label doesn't exist")
 }
 
-func onAutoCompletedKeyword(text string, index int, field *tview.InputField) bool {
-	fmt.Fprintln(os.Stderr, text, index, field.GetText())
-	field.SetText(fmt.Sprintf("%s%s, ", field.GetText(), text))
-	return true
-}
+// func onAutoCompletedKeyword(text string, index int, field *tview.InputField) bool {
+// 	fmt.Fprintln(os.Stderr, text, index, field.GetText())
+// 	field.SetText(fmt.Sprintf("%s%s, ", field.GetText(), text))
+// 	return true
+// }

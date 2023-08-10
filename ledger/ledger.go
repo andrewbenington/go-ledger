@@ -11,7 +11,6 @@ type Ledger struct {
 	entries    []Entry
 	entryMap   map[string]*Entry
 	patternMap map[*regexp.Regexp][]*Entry
-	labelMap   map[string][]*Entry
 }
 
 func (l *Ledger) InsertEntries(entries []Entry) {

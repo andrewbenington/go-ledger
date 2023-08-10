@@ -32,7 +32,8 @@ any transactions in those files from the specified year`,
 
 func Import(args []string) ([]command.Output, error) {
 	allSources, err := source.Get()
-	if len(allSources.Venmo) > 0 {
+	if err != nil {
+		return []command.Output{}, err
 	}
 	year, err := strconv.Atoi(args[0])
 	if err != nil {

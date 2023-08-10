@@ -33,12 +33,12 @@ func autoCompleteLabel(current string, _ *[]string) []string {
 	return labelNames
 }
 
-func autoCompleteKeyword(current string, currentArgs *[]string) []string {
-	currentLabel := (*currentArgs)[0]
-	for _, l := range ledger.AllLabels() {
-		if l.Name == currentLabel {
-			return l.Keywords
-		}
-	}
-	return []string{}
-}
+// func autoCompleteKeyword(current string, currentArgs *[]string) []string {
+// 	currentLabel := (*currentArgs)[0]
+// 	for _, l := range ledger.AllLabels() {
+// 		if l.Name == currentLabel {
+// 			return l.Keywords
+// 		}
+// 	}
+// 	return []string{}
+// }

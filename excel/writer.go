@@ -69,7 +69,7 @@ func WriteLedger(l ledger.Ledger) error {
 	}
 	err = addOverviewTotal(file)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("add overview total row: %s\n", err)
 	}
 	err = saveAndCloseFile(file, fmt.Sprintf("%d", year))
 	if err != nil {
@@ -85,7 +85,7 @@ func initMonth(file *excelize.File, month string, l *ledger.Ledger) error {
 	}
 	err = addOverviewRow(file, month)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("error adding %s overview row: %s\n", month, err)
 	}
 	return nil
 }
@@ -159,6 +159,9 @@ func writeEntryRow(file *excelize.File, row int, entry ledger.Entry, l *ledger.L
 		}
 		if fieldName == "Label" && entry.Label != "" {
 			err = applyLabelTextColor(file, entry.Label, entry.Date.Month().String(), cell)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -231,8 +234,14 @@ func addOverviewSheet(file *excelize.File) error {
 		if err != nil {
 			return fmt.Errorf("add overview sheet: %w", err)
 		}
-		file.SetCellValue("Overview", cell, l.Name)
+		err = file.SetCellValue("Overview", cell, l.Name)
+		if err != nil {
+			return err
+		}
 		err = applyLabelTextColor(file, l.Name, "Overview", cell)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -240,29 +249,32 @@ func addOverviewSheet(file *excelize.File) error {
 func addOverviewRow(file *excelize.File, month string) error {
 	rows, err := file.GetRows("Overview")
 	if err != nil {
-		return fmt.Errorf("add %s overview row: %w", month, err)
+		return err
 	}
 	maxRow := len(rows)
 	if err != nil {
-		return fmt.Errorf("add %s overview row: %w", month, err)
+		return err
 	}
 	cell, err := excelize.CoordinatesToCellName(1, maxRow+1)
 	if err != nil {
-		return fmt.Errorf("add %s overview row: %w", month, err)
+		return err
 	}
-	file.SetCellValue("Overview", cell, month)
+	err = file.SetCellValue("Overview", cell, month)
+	if err != nil {
+		return err
+	}
 	for i, l := range ledger.AllLabels() {
 		cell, err := excelize.CoordinatesToCellName(i+2, maxRow+1)
 		if err != nil {
-			return fmt.Errorf("add %s overview row: %w", month, err)
+			return err
 		}
 		labelCol, err := excelize.ColumnNumberToName(ledger.SwapTableStart)
 		if err != nil {
-			return fmt.Errorf("add %s overview row: %w", month, err)
+			return err
 		}
 		sumCol, err := excelize.ColumnNumberToName(ledger.SwapTableStart + 1)
 		if err != nil {
-			return fmt.Errorf("add %s overview row: %w", month, err)
+			return err
 		}
 		formula := fmt.Sprintf(
 			"=IFERROR(VLOOKUP(\"%s\", %s!%s:%s, 2, FALSE), 0)",
@@ -270,7 +282,10 @@ func addOverviewRow(file *excelize.File, month string) error {
 			month,
 			labelCol,
 			sumCol)
-		file.SetCellFormula("Overview", cell, formula)
+		err = file.SetCellFormula("Overview", cell, formula)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -278,32 +293,38 @@ func addOverviewRow(file *excelize.File, month string) error {
 func addOverviewTotal(file *excelize.File) error {
 	rows, err := file.GetRows("Overview")
 	if err != nil {
-		return fmt.Errorf("add overview total row: %w", err)
+		return err
 	}
 	maxRow := len(rows)
 	if err != nil {
-		return fmt.Errorf("add overview total row: %w", err)
+		return err
 	}
 	cell, err := excelize.CoordinatesToCellName(1, maxRow+1)
 	if err != nil {
-		return fmt.Errorf("add overview total row: %w", err)
+		return err
 	}
-	file.SetCellValue("Overview", cell, "Total")
+	err = file.SetCellValue("Overview", cell, "Total")
+	if err != nil {
+		return err
+	}
 	for i := range ledger.AllLabels() {
 		cell, err := excelize.CoordinatesToCellName(i+2, maxRow+1)
 		if err != nil {
-			return fmt.Errorf("add overview total row: %w", err)
+			return err
 		}
 		startCell, err := excelize.CoordinatesToCellName(i+2, 1)
 		if err != nil {
-			return fmt.Errorf("add overview total row: %w", err)
+			return err
 		}
 		endCell, err := excelize.CoordinatesToCellName(i+2, maxRow)
 		if err != nil {
-			return fmt.Errorf("add overview total row: %w", err)
+			return err
 		}
 		formula := fmt.Sprintf("=SUM(%s:%s)", startCell, endCell)
-		file.SetCellFormula("Overview", cell, formula)
+		err = file.SetCellFormula("Overview", cell, formula)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

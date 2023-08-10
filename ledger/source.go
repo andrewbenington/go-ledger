@@ -13,10 +13,5 @@ type FileSource interface {
 }
 
 func AllSources() []Source {
-	sources := make([]Source, 0, len(allSources))
-
-	for _, value := range allSources {
-		sources = append(sources, value)
-	}
-	return sources
+	return allSources
 }

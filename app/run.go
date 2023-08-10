@@ -144,7 +144,7 @@ func runCommandWithLogs(c *command.Command, args []string) {
 		w.Close()
 		os.Stdout = old
 
-		textView.Write([]byte("(Enter or ESC to continue)\n"))
+		_, _ = textView.Write([]byte("(Enter or ESC to continue)\n"))
 
 		// Queue because we aren't in main goroutine
 		app.QueueUpdate(func() {
