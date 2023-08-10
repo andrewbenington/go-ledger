@@ -1,4 +1,4 @@
-package config
+package source
 
 import (
 	"fmt"
@@ -10,38 +10,39 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type SourcesConfig struct {
+type Sources struct {
 	Chase []chase.Source `yaml:"chase"`
 	Venmo []venmo.Source `yaml:"venmo"`
 }
 
-func (s *SourcesConfig) read() error {
+func Get() (*Sources, error) {
+	s := &Sources{}
 	yamlFile, err := os.ReadFile("config/sources.yaml")
 	if err != nil {
-		return fmt.Errorf("yamlFile.Get err   #%v ", err)
+		return nil, fmt.Errorf("yamlFile.Get err   #%v ", err)
 	}
 	err = yaml.Unmarshal(yamlFile, s)
 	if err != nil {
-		return fmt.Errorf("error parsing sources: %s", err)
+		return nil, fmt.Errorf("error parsing sources: %s", err)
 	}
 	for i := range s.Chase {
 		s := s.Chase[i]
 		err := s.Validate()
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 	for i := range s.Venmo {
 		s := s.Venmo[i]
 		err := s.Validate()
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+	return s, nil
 }
 
-func (s *SourcesConfig) all() []ledger.Source {
+func (s *Sources) List() []ledger.Source {
 	allSources := []ledger.Source{}
 	for i := range s.Chase {
 		allSources = append(allSources, &s.Chase[i])

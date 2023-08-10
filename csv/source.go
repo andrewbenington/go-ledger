@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/andrewbenington/go-ledger/cmd/label"
+	"github.com/andrewbenington/go-ledger/config"
 	"github.com/andrewbenington/go-ledger/file"
 	"github.com/andrewbenington/go-ledger/ledger"
 	"github.com/andrewbenington/go-ledger/util"
@@ -20,6 +21,7 @@ type Source struct {
 	FooterRows      int    `yaml:"header_rows"`
 	OrderDescending bool   `yaml:"order_descending"`
 	// called after the entry has been populated with defined columns
+	// returns true if entry should be ignored
 	PostProcessEntry  func(*ledger.Entry, []string) error
 	FileSearchPattern file.SearchPattern
 }
@@ -44,18 +46,20 @@ func (s *Source) GetLedgerEntries(year int) ([]ledger.Entry, error) {
 	}
 	ledgerEntries := []ledger.Entry{}
 	for _, path := range filePaths {
-		fmt.Printf("\tReading file %s...\n", path)
+		fmt.Printf("\tReading file %s...", path)
 		fileEntries, err := s.LedgerEntriesFromFile(path, year)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("\n%s\n", err)
 			continue
 		}
+		fmt.Printf("\t(%d entries)\n", len(fileEntries))
 		ledgerEntries = append(ledgerEntries, fileEntries...)
 	}
 	return ledgerEntries, nil
 }
 
 func (s *Source) LedgerEntriesFromFile(filename string, year int) ([]ledger.Entry, error) {
+	cfg := config.GetConfig()
 	csvFile, err := os.Open(filename)
 	if err != nil {
 		return nil, fmt.Errorf("Error opening CSV file: %s", err)
@@ -85,7 +89,7 @@ func (s *Source) LedgerEntriesFromFile(filename string, year int) ([]ledger.Entr
 			if err != nil {
 				return nil, err
 			}
-			if entry.Date.Year() != year {
+			if cfg.IgnoreEntry(entry) || entry.Date.Year() != year {
 				continue
 			}
 			entry.Label = label.FindLabel(entry.Memo)

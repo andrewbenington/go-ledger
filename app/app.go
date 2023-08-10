@@ -2,7 +2,6 @@ package app
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 
@@ -61,7 +60,6 @@ func PopStack() {
 
 func DoCommand(c *command.Command) {
 	Log("DoCommand %s", c.Name)
-	fmt.Fprintln(os.Stderr, "test error")
 	LogStack()
 	view.SetBorder(true).SetTitle(c.Name)
 	if len(c.SubCommands) > 0 {
@@ -197,9 +195,6 @@ func RunCommandWithOutput(c *command.Command, args []string) {
 
 	go func() {
 		defer func() {
-			r.Close()
-			w.Close()
-			os.Stdout = old
 		}()
 		output, err := c.Run(args)
 		if err != nil {
@@ -208,10 +203,13 @@ func RunCommandWithOutput(c *command.Command, args []string) {
 				String:    err.Error(),
 			}}
 		}
-		_, err = w.WriteString("(Enter or ESC to continue)\n")
-		if err != nil {
-			LogErr(err.Error())
-		}
+
+		r.Close()
+		w.Close()
+		os.Stdout = old
+
+		textView.Write([]byte("(Enter or ESC to continue)\n"))
+
 		app.QueueUpdate(func() {
 			textView.
 				SetDoneFunc(func(key tcell.Key) {
@@ -221,7 +219,6 @@ func RunCommandWithOutput(c *command.Command, args []string) {
 					}
 				})
 		})
-
 	}()
 
 	// display standard out to screen
@@ -231,7 +228,6 @@ func RunCommandWithOutput(c *command.Command, args []string) {
 		var line string
 		for err == nil {
 			line, err = reader.ReadString('\n')
-			Log(line)
 			_, _ = textView.Write([]byte(line))
 		}
 	}()

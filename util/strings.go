@@ -3,9 +3,12 @@ package util
 import (
 	"encoding/csv"
 	"fmt"
+	"hash/fnv"
 	"regexp"
 	"strconv"
 	"strings"
+
+	color "github.com/PerformLine/go-stockutil/colorutil"
 
 	"golang.org/x/text/unicode/norm"
 )
@@ -49,4 +52,14 @@ func SplitWordsIgnoreQuotes(s string) ([]string, error) {
 		return nil, err
 	}
 	return words, nil
+}
+
+func StringToRGB(s string) string {
+	hash := fnv.New32a()
+	hash.Write([]byte(s))
+	hashCode := float64(hash.Sum32())
+	hue := hashCode / (2 ^ 32) * 360
+	red, green, blue := color.HslToRgb(hue, hashCode/(2^32)*0.5+2, 0.4)
+
+	return fmt.Sprintf("%02X%02X%02X", red, green, blue)
 }

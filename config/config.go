@@ -2,20 +2,32 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/andrewbenington/go-ledger/ledger"
+	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
-	Sources SourcesConfig
-	General GeneralConfig
+	Chase ChaseConfig `yaml:"chase"`
+	Venmo VenmoConfig `yaml:"venmo"`
 }
 
 var (
 	config Config
 )
+
+func (g *Config) read() error {
+	yamlFile, err := os.ReadFile("config/config.yaml")
+	if err != nil {
+		return fmt.Errorf("yamlFile.Get err   #%v ", err)
+	}
+	err = yaml.Unmarshal(yamlFile, g)
+	if err != nil {
+		return fmt.Errorf("error parsing general config: %s", err)
+	}
+	return nil
+}
 
 func GetConfig() Config {
 	err := ReadConfig()
@@ -27,21 +39,19 @@ func GetConfig() Config {
 }
 
 func ReadConfig() error {
-	err := config.General.read()
+	err := config.read()
 	if err != nil {
-		return fmt.Errorf("read general config: %s", err)
-	}
-	err = config.Sources.read()
-	if err != nil {
-		return fmt.Errorf("read sources config: %s", err)
+		return fmt.Errorf("read config: %s", err)
 	}
 	return nil
 }
 
-func Sources() []ledger.Source {
-	err := ReadConfig()
-	if err != nil {
-		log.Fatalf("could not read config: %s", err)
+func (c *Config) IgnoreEntry(e *ledger.Entry) bool {
+	if e.SourceType == "CHASE" {
+		return c.Chase.IgnoreEntry(e)
 	}
-	return config.Sources.all()
+	if e.SourceType == "VENMO" {
+		return c.Venmo.IgnoreEntry(e)
+	}
+	return false
 }

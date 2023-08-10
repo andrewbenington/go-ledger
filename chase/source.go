@@ -18,20 +18,21 @@ const (
 )
 
 var (
-	CreditColumns = csv.ColumnFormat{
+	creditColumns = csv.ColumnFormat{
 		Date:  1,
 		Memo:  3,
 		Type:  5,
 		Value: 6,
 	}
-	NonCreditColumns = csv.ColumnFormat{
+	nonCreditColumns = csv.ColumnFormat{
 		Date:    2,
 		Memo:    3,
 		Value:   4,
 		Type:    5,
 		Balance: 6,
 	}
-	FourDigitPattern = regexp.MustCompile(`[0-9]{4}`)
+	fourDigitPattern  = regexp.MustCompile(`[0-9]{4}`)
+	maxDateAdjustment = 7 * 24 * time.Hour
 )
 
 type Source struct {
@@ -47,7 +48,7 @@ func (s *Source) Name() string {
 }
 
 func (s *Source) Validate() error {
-	if len(s.LastDigits) != 4 || !FourDigitPattern.MatchString(s.LastDigits) {
+	if len(s.LastDigits) != 4 || !fourDigitPattern.MatchString(s.LastDigits) {
 		return fmt.Errorf("Chase CSV source validation: last_four_digits must be exactly four digits")
 	}
 	if s.AccountType != "credit" && s.AccountType != "non-credit" {
@@ -92,9 +93,9 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		FileNamePatterns: []regexp.Regexp{*fileNamePattern},
 	}
 	if s.AccountType == "credit" {
-		s.csvSource.Columns = CreditColumns
+		s.csvSource.Columns = creditColumns
 	} else if s.AccountType == "non-credit" {
-		s.csvSource.Columns = NonCreditColumns
+		s.csvSource.Columns = nonCreditColumns
 	}
 	return nil
 }
@@ -103,7 +104,11 @@ func PostProcessEntry(entry *ledger.Entry, row []string) error {
 	entry.SourceType = SourceType
 	month, day := util.ExtractDateFromTitle(entry.Memo)
 	if month > 0 && day > 0 {
-		entry.Date = time.Date(entry.Date.Year(), time.Month(month), day, 0, 0, 0, 0, time.UTC)
+		newDate := time.Date(entry.Date.Year(), time.Month(month), day, 0, 0, 0, 0, time.UTC)
+		if newDate.After(entry.Date) && newDate.Sub(entry.Date) < maxDateAdjustment {
+			entry.Notes = fmt.Sprintf("original date: %s", entry.Date)
+			entry.Date = newDate
+		}
 	}
 	entry.ID = hashEntry(entry)
 	return nil

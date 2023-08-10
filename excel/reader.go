@@ -43,6 +43,7 @@ func addEntriesFromFile(l *ledger.Ledger, file *excelize.File) error {
 }
 
 func ledgerEntriesFromSheet(file *excelize.File, sheet string) ([]ledger.Entry, error) {
+	cfg := config.GetConfig()
 	rows, err := file.GetRows(sheet)
 	if err != nil {
 		return nil, fmt.Errorf("error getting rows from sheet %s: %w", sheet, err)
@@ -54,9 +55,8 @@ func ledgerEntriesFromSheet(file *excelize.File, sheet string) ([]ledger.Entry, 
 			fmt.Printf("error getting entry from from row %v: %s\n", row, err)
 			continue
 		}
-		cfg := config.GetConfig()
-		if cfg.General.Chase.IgnoreVenmo {
-
+		if cfg.IgnoreEntry(entry) {
+			continue
 		}
 		entries = append(entries, *entry)
 	}
@@ -69,7 +69,7 @@ func ledgerEntryFromRow(row []string) (entry *ledger.Entry, err error) {
 		entry.ID = util.NormalizeUnicode(row[ledger.IDIndex])
 	}
 	if len(row) > ledger.DateIndex {
-		entry.Date, err = time.Parse("1/2/06 03:04", row[ledger.DateIndex])
+		entry.Date, err = time.Parse("1/2/06 15:04", row[ledger.DateIndex])
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing date: %s", err)
 		}
@@ -96,7 +96,7 @@ func ledgerEntryFromRow(row []string) (entry *ledger.Entry, err error) {
 		entry.SourceName = util.NormalizeUnicode(row[ledger.SourceNameIndex])
 	}
 	if len(row) > ledger.SourceTypeIndex {
-		entry.SourceName = util.NormalizeUnicode(row[ledger.SourceTypeIndex])
+		entry.SourceType = util.NormalizeUnicode(row[ledger.SourceTypeIndex])
 	}
 	if len(row) > ledger.PersonIndex {
 		entry.Person = util.NormalizeUnicode(row[ledger.PersonIndex])

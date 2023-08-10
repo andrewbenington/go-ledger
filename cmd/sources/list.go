@@ -2,7 +2,7 @@ package sources
 
 import (
 	"github.com/andrewbenington/go-ledger/cmd/command"
-	"github.com/andrewbenington/go-ledger/config"
+	"github.com/andrewbenington/go-ledger/source"
 )
 
 var (
@@ -15,7 +15,11 @@ var (
 
 func ListSources(args []string) ([]command.Output, error) {
 	outputs := []command.Output{}
-	for _, source := range config.Sources() {
+	allSources, err := source.Get()
+	if err != nil {
+		return nil, err
+	}
+	for _, source := range allSources.List() {
 		outputs = append(outputs, command.Output{
 			String:  source.Name(),
 			Options: []command.OutputOption{},
