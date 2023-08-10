@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/andrewbenington/go-ledger/cmd/label"
 	"github.com/andrewbenington/go-ledger/config"
 	"github.com/andrewbenington/go-ledger/file"
 	"github.com/andrewbenington/go-ledger/ledger"
@@ -92,7 +91,7 @@ func (s *Source) LedgerEntriesFromFile(filename string, year int) ([]ledger.Entr
 			if cfg.IgnoreEntry(entry) || entry.Date.Year() != year {
 				continue
 			}
-			entry.Label = label.FindLabel(entry.Memo)
+			entry.Label = ledger.FindLabel(entry.Memo)
 			if s.OrderDescending {
 				entries = append([]ledger.Entry{*entry}, entries...)
 			} else {

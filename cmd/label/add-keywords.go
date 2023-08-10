@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/andrewbenington/go-ledger/cmd/command"
+	"github.com/andrewbenington/go-ledger/command"
+	"github.com/andrewbenington/go-ledger/ledger"
 )
 
 var (
@@ -25,27 +26,13 @@ func AddLabelKeyword(args []string) ([]command.Output, error) {
 		return []command.Output{}, errors.New("must specify label and at least one keyword")
 	}
 	newKeywords := stripKeywords(strings.Split(args[1], ","))
-	existingLabel := false
-	var label *Label
-	for i := range allLabels {
-		label = &allLabels[i]
-		if strings.EqualFold(label.Name, args[0]) {
-			existingLabel = true
-			label.Keywords = append(label.Keywords, newKeywords...)
-			break
-		}
-	}
-	outputString := ""
-	if !existingLabel {
-		allLabels = append(allLabels, Label{Name: args[0], Keywords: newKeywords})
-		outputString = fmt.Sprintf("Created label '%s'\n", args[0])
-	}
-	err := saveLabels()
-	if err != nil {
-		return []command.Output{}, fmt.Errorf("error saving labels: %w", err)
-	}
+	label, isNew, err := ledger.AddLabelKeywords(args[0], newKeywords)
 	if err != nil {
 		return []command.Output{}, err
+	}
+	outputString := fmt.Sprintf("Updated label '%s'\n", args[0])
+	if isNew {
+		outputString = fmt.Sprintf("Created label '%s'\n", args[0])
 	}
 	return []command.Output{
 		{

@@ -3,10 +3,10 @@ package cmd
 import (
 	"os"
 
-	"github.com/andrewbenington/go-ledger/cmd/command"
 	"github.com/andrewbenington/go-ledger/cmd/import_transactions"
 	"github.com/andrewbenington/go-ledger/cmd/label"
 	"github.com/andrewbenington/go-ledger/cmd/sources"
+	"github.com/andrewbenington/go-ledger/command"
 	"github.com/spf13/cobra"
 )
 

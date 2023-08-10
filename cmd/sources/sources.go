@@ -1,6 +1,6 @@
 package sources
 
-import "github.com/andrewbenington/go-ledger/cmd/command"
+import "github.com/andrewbenington/go-ledger/command"
 
 var (
 	SourceCmd = &command.Command{

@@ -1,7 +1,7 @@
 package sources
 
 import (
-	"github.com/andrewbenington/go-ledger/cmd/command"
+	"github.com/andrewbenington/go-ledger/command"
 	"github.com/andrewbenington/go-ledger/source"
 )
 

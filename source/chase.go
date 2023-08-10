@@ -1,4 +1,4 @@
-package chase
+package source
 
 import (
 	"fmt"
@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	DATE_FORMAT = "01/02/2006"
-	SourceType  = "CHASE"
+	ChaseDateFormat = "01/02/2006"
+	ChaseSourceType = "CHASE"
 )
 
 var (
@@ -35,7 +35,7 @@ var (
 	maxDateAdjustment = 7 * 24 * time.Hour
 )
 
-type Source struct {
+type ChaseSource struct {
 	SourceName  string
 	Directories []string
 	LastDigits  string
@@ -43,11 +43,11 @@ type Source struct {
 	csvSource   *csv.Source
 }
 
-func (s *Source) Name() string {
+func (s *ChaseSource) Name() string {
 	return s.SourceName
 }
 
-func (s *Source) Validate() error {
+func (s *ChaseSource) Validate() error {
 	if len(s.LastDigits) != 4 || !fourDigitPattern.MatchString(s.LastDigits) {
 		return fmt.Errorf("Chase CSV source validation: last_four_digits must be exactly four digits")
 	}
@@ -57,11 +57,11 @@ func (s *Source) Validate() error {
 	return nil
 }
 
-func (s *Source) GetLedgerEntries(year int) ([]ledger.Entry, error) {
+func (s *ChaseSource) GetLedgerEntries(year int) ([]ledger.Entry, error) {
 	return s.csvSource.GetLedgerEntries(year)
 }
 
-func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *ChaseSource) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	fields := struct {
 		SourceName  string   `yaml:"name"`
 		Directories []string `yaml:"directories"`
@@ -79,10 +79,10 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	s.Directories = fields.Directories
 	s.csvSource = &csv.Source{
 		SourceName:       s.SourceName,
-		DateFormat:       DATE_FORMAT,
+		DateFormat:       ChaseDateFormat,
 		HeaderRows:       1,
 		OrderDescending:  true,
-		PostProcessEntry: PostProcessEntry,
+		PostProcessEntry: PostProcessChase,
 	}
 	fileNamePattern, err := regexp.Compile(fmt.Sprintf("Chase%s_Activity.*", s.LastDigits))
 	if err != nil {
@@ -100,8 +100,8 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-func PostProcessEntry(entry *ledger.Entry, row []string) error {
-	entry.SourceType = SourceType
+func PostProcessChase(entry *ledger.Entry, row []string) error {
+	entry.SourceType = ChaseSourceType
 	month, day := util.ExtractDateFromTitle(entry.Memo)
 	if month > 0 && day > 0 {
 		newDate := time.Date(entry.Date.Year(), time.Month(month), day, 0, 0, 0, 0, time.UTC)
@@ -115,7 +115,7 @@ func PostProcessEntry(entry *ledger.Entry, row []string) error {
 }
 
 func hashEntry(entry *ledger.Entry) string {
-	str := fmt.Sprintf("%s_%f", entry.Date.Format(DATE_FORMAT), entry.Balance)
+	str := fmt.Sprintf("%s_%f", entry.Date.Format(ChaseDateFormat), entry.Balance)
 	algorithm := fnv.New32a()
 	algorithm.Write([]byte(str))
 	return fmt.Sprintf("%d", algorithm.Sum32())

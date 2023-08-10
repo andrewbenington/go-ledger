@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/andrewbenington/go-ledger/chase"
 	"github.com/andrewbenington/go-ledger/ledger"
-	"github.com/andrewbenington/go-ledger/venmo"
 	"gopkg.in/yaml.v2"
 )
 
 type Sources struct {
-	Chase []chase.Source `yaml:"chase"`
-	Venmo []venmo.Source `yaml:"venmo"`
+	Chase []ChaseSource `yaml:"chase"`
+	Venmo []VenmoSource `yaml:"venmo"`
 }
 
 func Get() (*Sources, error) {

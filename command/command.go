@@ -14,7 +14,7 @@ type Command struct {
 	SubCommands  []*Command
 	ExpectedArgs []ArgOptions
 	Run          func(args []string) ([]Output, error)
-	ShowOutput   bool
+	ShowLogs     bool
 }
 
 func (c *Command) ToCobra() *cobra.Command {

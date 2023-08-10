@@ -1,4 +1,4 @@
-package venmo
+package source
 
 import (
 	"regexp"
@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	DATE_FORMAT = "2006-01-02T15:04:05"
-	SourceType  = "VENMO"
+	VenmoDateFormat = "2006-01-02T15:04:05"
+	VenmoSourceType = "VENMO"
 )
 
 var (
@@ -25,13 +25,13 @@ var (
 			Person: 7,
 			Value:  9,
 		},
-		DateFormat: DATE_FORMAT,
+		DateFormat: VenmoDateFormat,
 		HeaderRows: 4,
 		FooterRows: 1,
 	}
 )
 
-type Source struct {
+type VenmoSource struct {
 	SourceName        string   `yaml:"name"`
 	AccountHolderName string   `yaml:"account_holder_name"`
 	Directories       []string `yaml:"directories"`
@@ -39,19 +39,19 @@ type Source struct {
 	csvSource         csv.Source
 }
 
-func (s *Source) Name() string {
+func (s *VenmoSource) Name() string {
 	return s.SourceName
 }
 
-func (s *Source) Validate() error {
+func (s *VenmoSource) Validate() error {
 	return nil
 }
 
-func (s *Source) GetLedgerEntries(year int) ([]ledger.Entry, error) {
+func (s *VenmoSource) GetLedgerEntries(year int) ([]ledger.Entry, error) {
 	return s.csvSource.GetLedgerEntries(year)
 }
 
-func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *VenmoSource) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	fields := struct {
 		SourceName        string   `yaml:"name"`
 		AccountHolderName string   `yaml:"account_holder_name"`
@@ -66,7 +66,7 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	s.Directories = fields.Directories
 	s.csvSource = CSVSource
 	s.csvSource.PostProcessEntry = func(entry *ledger.Entry, row []string) error {
-		return PostProcessEntry(entry, row, s.AccountHolderName)
+		return postProcessVenmo(entry, row, s.AccountHolderName)
 	}
 	s.csvSource.FileSearchPattern = file.SearchPattern{
 		Directories:      s.Directories,
@@ -75,8 +75,8 @@ func (s *Source) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-func PostProcessEntry(entry *ledger.Entry, row []string, accountHolder string) error {
-	entry.SourceType = SourceType
+func postProcessVenmo(entry *ledger.Entry, row []string, accountHolder string) error {
+	entry.SourceType = VenmoSourceType
 	// if payment, use "To" column
 	if entry.Person == accountHolder {
 		entry.Person = row[7]

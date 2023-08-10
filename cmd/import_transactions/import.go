@@ -3,7 +3,7 @@ package import_transactions
 import (
 	"strconv"
 
-	"github.com/andrewbenington/go-ledger/cmd/command"
+	"github.com/andrewbenington/go-ledger/command"
 	"github.com/andrewbenington/go-ledger/excel"
 	"github.com/andrewbenington/go-ledger/source"
 )
@@ -17,8 +17,8 @@ any transactions in those files from the specified year`,
 		ExpectedArgs: []command.ArgOptions{
 			{Name: "Year"},
 		},
-		Run:        Import,
-		ShowOutput: true,
+		Run:      Import,
+		ShowLogs: true,
 	}
 	successOutput = command.Output{
 		String:    "Successfully Assembled",

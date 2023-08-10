@@ -1,7 +1,8 @@
 package label
 
 import (
-	"github.com/andrewbenington/go-ledger/cmd/command"
+	"github.com/andrewbenington/go-ledger/command"
+	"github.com/andrewbenington/go-ledger/ledger"
 )
 
 var (
@@ -16,8 +17,8 @@ var (
 )
 
 func CheckLabel(args []string) ([]command.Output, error) {
-	var label Label
-	for _, label = range allLabels {
+	var label ledger.Label
+	for _, label = range ledger.AllLabels() {
 		if label.Name == args[0] {
 			break
 		}

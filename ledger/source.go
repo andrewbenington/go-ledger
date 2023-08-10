@@ -12,7 +12,7 @@ type Source interface {
 type FileSource interface {
 }
 
-func All() []Source {
+func AllSources() []Source {
 	sources := make([]Source, 0, len(allSources))
 
 	for _, value := range allSources {

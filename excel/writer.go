@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/andrewbenington/go-ledger/cmd/label"
 	"github.com/andrewbenington/go-ledger/ledger"
 	"github.com/andrewbenington/go-ledger/util"
 	"github.com/xuri/excelize/v2"
@@ -227,7 +226,7 @@ func addOverviewSheet(file *excelize.File) error {
 	if err != nil {
 		return fmt.Errorf("add overview sheet: %w", err)
 	}
-	for i, l := range label.All() {
+	for i, l := range ledger.AllLabels() {
 		cell, err := excelize.CoordinatesToCellName(i+2, 1)
 		if err != nil {
 			return fmt.Errorf("add overview sheet: %w", err)
@@ -252,7 +251,7 @@ func addOverviewRow(file *excelize.File, month string) error {
 		return fmt.Errorf("add %s overview row: %w", month, err)
 	}
 	file.SetCellValue("Overview", cell, month)
-	for i, l := range label.All() {
+	for i, l := range ledger.AllLabels() {
 		cell, err := excelize.CoordinatesToCellName(i+2, maxRow+1)
 		if err != nil {
 			return fmt.Errorf("add %s overview row: %w", month, err)
@@ -290,7 +289,7 @@ func addOverviewTotal(file *excelize.File) error {
 		return fmt.Errorf("add overview total row: %w", err)
 	}
 	file.SetCellValue("Overview", cell, "Total")
-	for i := range label.All() {
+	for i := range ledger.AllLabels() {
 		cell, err := excelize.CoordinatesToCellName(i+2, maxRow+1)
 		if err != nil {
 			return fmt.Errorf("add overview total row: %w", err)

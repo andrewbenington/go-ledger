@@ -1,7 +1,8 @@
 package label
 
 import (
-	"github.com/andrewbenington/go-ledger/cmd/command"
+	"github.com/andrewbenington/go-ledger/command"
+	"github.com/andrewbenington/go-ledger/ledger"
 )
 
 var (
@@ -14,7 +15,7 @@ var (
 
 func ListLabels(args []string) ([]command.Output, error) {
 	outputs := []command.Output{}
-	for _, label := range allLabels {
+	for _, label := range ledger.AllLabels() {
 		outputs = append(outputs, command.Output{
 			String: label.Name,
 			Options: []command.OutputOption{
