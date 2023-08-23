@@ -24,7 +24,7 @@ func Start() {
 	app = tview.NewApplication()
 	view = tview.NewFrame(nil)
 	stack = []*command.Command{cmd.GetCommand()}
-	doCommand(cmd.GetCommand())
+	doCommand(cmd.GetCommand(), nil)
 	app.SetRoot(view, true)
 	if err := app.Run(); err != nil {
 		panic(err)
@@ -40,7 +40,7 @@ func listFromSubcommands(c *command.Command) *tview.List {
 		list.AddItem(sc.Name, sc.Short, []rune(sc.Name)[0], func() {
 			LogStack()
 			stack = append(stack, sc)
-			doCommand(sc)
+			doCommand(sc, nil)
 		})
 	}
 	if len(stack) > 1 {
@@ -54,24 +54,26 @@ func listFromSubcommands(c *command.Command) *tview.List {
 func popStack() {
 	stack = stack[:len(stack)-1]
 	prevCommand := stack[len(stack)-1]
-	doCommand(prevCommand)
+	doCommand(prevCommand, nil)
 }
 
 // doCommand executes the given command, with input, output or
 // neither depending on the command's usage
-func doCommand(c *command.Command) {
+func doCommand(c *command.Command, args []string) {
+	LogInterface(c)
+	LogInterface(args)
 	view.SetBorder(true).SetTitle(c.Name)
 	if len(c.SubCommands) > 0 {
 		view.SetPrimitive(listFromSubcommands(c))
 		return
 	}
-	if len(c.ExpectedArgs) > 0 {
+	if len(c.ExpectedArgs) > 0 && len(args) == 0 {
 		runCommandWithInput(c)
 		return
 	}
 	if c.ShowLogs {
-		runCommandWithLogs(c, nil)
+		runCommandWithLogs(c, args)
 		return
 	}
-	runCommand(c, nil)
+	runCommand(c, args)
 }

@@ -2,10 +2,18 @@ package command
 
 import "github.com/rivo/tview"
 
+type ArgType int
+
+const (
+	StringArg ArgType = iota
+	BoolArg
+)
+
 type ArgOptions struct {
 	Name            string
 	AutoComplete    func(currentText string, currentArgs *[]string) []string
 	OnAutoCompleted func(text string, index int, field *tview.InputField) bool
+	Type            ArgType
 }
 
 func (a *ArgOptions) AutoCompleteWithArgs(currentArgs *[]string) func(currentText string) []string {

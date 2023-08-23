@@ -2,8 +2,8 @@ package ledger
 
 import (
 	"fmt"
-	"log"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -17,7 +17,8 @@ type Label struct {
 }
 
 const (
-	filename = "config/labels.yaml"
+	configFolder = "config"
+	configFile   = "labels.yaml"
 )
 
 var (
@@ -27,14 +28,14 @@ var (
 func init() {
 	labels, err := loadLabels()
 	if err != nil {
-		fmt.Printf("Error loading labels: %s", err)
+		fmt.Printf("Error loading labels: %s\n", err)
 		return
 	}
 	allLabels = labels
 	for i := range allLabels {
 		re, err := allLabels[i].RegExp()
 		if err != nil {
-			fmt.Printf("Error loading labels: %s", err)
+			fmt.Printf("Error loading labels: %s\n", err)
 			continue
 		}
 		allLabels[i].re = re
@@ -59,10 +60,25 @@ func (l *Label) RegExp() (*regexp.Regexp, error) {
 	return regexp.Compile(reString)
 }
 
-func loadLabels() ([]Label, error) {
-	yamlFile, err := os.ReadFile("config/labels.yaml")
+func initialize() error {
+	err := os.MkdirAll(configFolder, 0755)
 	if err != nil {
-		log.Printf("yamlFile.Get err   #%v ", err)
+		return fmt.Errorf("mkdir '%s': %w", configFolder, err)
+	}
+	return os.WriteFile(filepath.Join(configFolder, configFile), []byte{}, 0644)
+}
+
+func loadLabels() ([]Label, error) {
+	_, err := os.Stat(filepath.Join(configFolder, configFile))
+	if err != nil {
+		err = initialize()
+		if err != nil {
+			return nil, fmt.Errorf("initialize labels: %w", err)
+		}
+	}
+	yamlFile, err := os.ReadFile(filepath.Join(configFolder, configFile))
+	if err != nil {
+		return nil, fmt.Errorf("read %s: %v ", filepath.Join(configFolder, configFile), err)
 	}
 	labels := []Label{}
 	err = yaml.Unmarshal(yamlFile, &labels)
@@ -78,7 +94,7 @@ func saveLabels() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filename, rawString, 0755)
+	return os.WriteFile(filepath.Join(configFolder, configFile), rawString, 0755)
 }
 
 func FindLabel(memo string) string {
@@ -101,13 +117,28 @@ func AddLabelKeywords(labelName string, toAdd []string) (l Label, created bool, 
 	}
 	if label == nil {
 		created = true
-		allLabels = append(allLabels, Label{Name: labelName, Keywords: toAdd})
+		label = &Label{Name: labelName, Keywords: toAdd}
+		allLabels = append(allLabels, *label)
 	}
 	err = saveLabels()
 	if err != nil {
-		return l, false, fmt.Errorf("error saving labels: %w", err)
+		return l, false, fmt.Errorf("save labels: %w", err)
 	}
 	return *label, created, err
+}
+
+func RemoveLabel(labelName string) error {
+	for i := range allLabels {
+		if strings.EqualFold(labelName, allLabels[i].Name) {
+			allLabels = append(allLabels[:i], allLabels[i+1:]...)
+			err := saveLabels()
+			if err != nil {
+				return fmt.Errorf("save labels: %w", err)
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("no label with name %s", labelName)
 }
 
 // RemoveLabelKeywords removes the given keywords from the label with name labelName
@@ -141,7 +172,7 @@ func RemoveLabelKeywords(labelName string, toRemove []string) (l Label, err erro
 	label.Keywords = toKeep
 	err = saveLabels()
 	if err != nil {
-		return l, fmt.Errorf("error saving labels: %w", err)
+		return l, fmt.Errorf("save labels: %w", err)
 	}
 	return *label, nil
 }

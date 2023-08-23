@@ -19,7 +19,14 @@ func ListSources(args []string) ([]command.Output, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, source := range allSources.List() {
+	sourceList := allSources.List()
+	if len(sourceList) == 0 {
+		return []command.Output{{
+			String:    "No sources configured",
+			IsMessage: true,
+		}}, nil
+	}
+	for _, source := range sourceList {
 		outputs = append(outputs, command.Output{
 			String:  source.Name(),
 			Options: []command.OutputOption{},

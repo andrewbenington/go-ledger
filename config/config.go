@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/andrewbenington/go-ledger/ledger"
 	"gopkg.in/yaml.v2"
@@ -17,14 +18,26 @@ var (
 	config Config
 )
 
+const (
+	configFolder = "config"
+	configFile   = "config.yaml"
+)
+
 func (g *Config) read() error {
-	yamlFile, err := os.ReadFile("config/config.yaml")
+	_, err := os.Stat("config/config.yaml")
 	if err != nil {
-		return fmt.Errorf("yamlFile.Get err   #%v ", err)
+		err = initialize()
+		if err != nil {
+			return fmt.Errorf("initialize config: %w", err)
+		}
+	}
+	yamlFile, err := os.ReadFile(filepath.Join(configFolder, configFile))
+	if err != nil {
+		return fmt.Errorf("read %s: %v ", filepath.Join(configFolder, configFile), err)
 	}
 	err = yaml.Unmarshal(yamlFile, g)
 	if err != nil {
-		return fmt.Errorf("error parsing general config: %s", err)
+		return fmt.Errorf("parse config: %s", err)
 	}
 	return nil
 }
@@ -44,6 +57,14 @@ func ReadConfig() error {
 		return fmt.Errorf("read config: %s", err)
 	}
 	return nil
+}
+
+func initialize() error {
+	err := os.MkdirAll("config", 0755)
+	if err != nil {
+		return fmt.Errorf("mkdir 'config': %w", err)
+	}
+	return os.WriteFile("config/config.yaml", []byte{}, 0644)
 }
 
 func (c *Config) IgnoreEntry(e *ledger.Entry) bool {

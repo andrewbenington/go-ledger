@@ -3,6 +3,7 @@ package source
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/andrewbenington/go-ledger/ledger"
 	"gopkg.in/yaml.v2"
@@ -13,11 +14,31 @@ type Sources struct {
 	Venmo []VenmoSource `yaml:"venmo"`
 }
 
-func Get() (*Sources, error) {
-	s := &Sources{}
-	yamlFile, err := os.ReadFile("config/sources.yaml")
+const (
+	configFolder = "config"
+	configFile   = "sources.yaml"
+)
+
+func initialize() error {
+	err := os.MkdirAll(configFolder, 0755)
 	if err != nil {
-		return nil, fmt.Errorf("yamlFile.Get err   #%v ", err)
+		return fmt.Errorf("mkdir '%s': %w", configFolder, err)
+	}
+	return os.WriteFile(filepath.Join(configFolder, configFile), []byte{}, 0644)
+}
+
+func Get() (*Sources, error) {
+	_, err := os.Stat(filepath.Join(configFolder, configFile))
+	if err != nil {
+		err = initialize()
+		if err != nil {
+			return nil, fmt.Errorf("initialize labels: %w", err)
+		}
+	}
+	s := &Sources{}
+	yamlFile, err := os.ReadFile(filepath.Join(configFolder, configFile))
+	if err != nil {
+		return nil, fmt.Errorf("read %s: %v ", filepath.Join(configFolder, configFile), err)
 	}
 	err = yaml.Unmarshal(yamlFile, s)
 	if err != nil {

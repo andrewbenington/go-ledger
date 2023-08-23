@@ -28,7 +28,7 @@ func displayOutput(outputs []command.Output) {
 				Log("Running %+v with %+v", opt.Name, opt.Args)
 				view.SetBorder(true).SetTitle(opt.Name)
 				stack = append(stack, opt.Select)
-				runCommandWithLogs(opt.Select, opt.Args)
+				doCommand(opt.Select, opt.Args)
 			}
 		})
 	}

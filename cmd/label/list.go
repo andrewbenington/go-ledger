@@ -15,6 +15,13 @@ var (
 
 func ListLabels(args []string) ([]command.Output, error) {
 	outputs := []command.Output{}
+	labelList := ledger.AllLabels()
+	if len(labelList) == 0 {
+		return []command.Output{{
+			String:    "No labels configured",
+			IsMessage: true,
+		}}, nil
+	}
 	for _, label := range ledger.AllLabels() {
 		outputs = append(outputs, command.Output{
 			String: label.Name,

@@ -2,7 +2,6 @@ package label
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/andrewbenington/go-ledger/command"
@@ -16,6 +15,7 @@ var (
 		ExpectedArgs: []command.ArgOptions{
 			{Name: "Label", AutoComplete: autoCompleteLabel},
 			{Name: "Keywords (Comma-separated)"},
+			{Name: "Delete Label", Type: command.BoolArg},
 			// auto complete logic is broken
 			// {Name: "Keywords (Comma-separated)", AutoComplete: autoCompleteKeyword, OnAutoCompleted: onAutoCompletedKeyword},
 		},
@@ -27,20 +27,20 @@ func RemoveLabelKeyword(args []string) ([]command.Output, error) {
 	if len(args) < 2 {
 		return []command.Output{}, errors.New("must specify label and at least one keyword")
 	}
-	allLabels := ledger.AllLabels()
-	for _, label := range allLabels {
-		if strings.EqualFold(label.Name, args[0]) {
-			_, err := ledger.RemoveLabelKeywords(label.Name, strings.Split(args[1], ","))
-			if err != nil {
-				return nil, fmt.Errorf("error saving labels: %w", err)
-			}
-			return []command.Output{{
-				String:    "successfully removed keywords",
-				IsMessage: true,
-			}}, nil
+	if len(args) == 3 && strings.EqualFold(args[2], "true") {
+		err := ledger.RemoveLabel(args[0])
+		if err != nil {
+			return nil, err
 		}
 	}
-	return nil, fmt.Errorf("that label doesn't exist")
+	_, err := ledger.RemoveLabelKeywords(args[0], strings.Split(args[1], ","))
+	if err != nil {
+		return nil, err
+	}
+	return []command.Output{{
+		String:    "successfully removed keywords",
+		IsMessage: true,
+	}}, nil
 }
 
 // func onAutoCompletedKeyword(text string, index int, field *tview.InputField) bool {
