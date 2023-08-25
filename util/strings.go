@@ -44,9 +44,9 @@ func ParseMoneyAmount(s string) (float64, error) {
 	return f, err
 }
 
-func SplitWordsIgnoreQuotes(s string) ([]string, error) {
+func SplitWordsIgnoreQuotes(s string, delim rune) ([]string, error) {
 	r := csv.NewReader(strings.NewReader(s))
-	r.Comma = ' ' // space
+	r.Comma = delim
 	words, err := r.Read()
 	if err != nil {
 		return nil, err

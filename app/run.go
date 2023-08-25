@@ -2,6 +2,7 @@ package app
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 
 	"github.com/andrewbenington/go-ledger/command"
@@ -16,7 +17,7 @@ func runCommand(c *command.Command, args []string) {
 	if err != nil {
 		output = []command.Output{{
 			IsMessage: true,
-			String:    err.Error(),
+			String:    fmt.Sprintf("ERROR:\n%s", err),
 		}}
 	}
 	displayOutput(output)
@@ -25,8 +26,8 @@ func runCommand(c *command.Command, args []string) {
 // runCommandWithInput takes user input for the given command, runs the
 // command with those inputs as arguments, and displays the output
 func runCommandWithInput(c *command.Command) {
-	form := formViewFromCommand(c)
-	view.SetPrimitive(form.view)
+	dataInput := formViewFromCommand(c)
+	view.SetPrimitive(dataInput.form)
 }
 
 // runCommandWithLogs executes the command with the given arguments, outputs

@@ -9,7 +9,7 @@ import (
 var (
 	AddCommand = &command.Command{
 		Name:  "add",
-		Short: "add comma-separated keywords to label",
+		Short: "add source",
 		SubCommands: []*command.Command{
 			AddChaseCommand,
 		},

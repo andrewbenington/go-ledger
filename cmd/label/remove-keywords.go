@@ -32,6 +32,10 @@ func RemoveLabelKeyword(args []string) ([]command.Output, error) {
 		if err != nil {
 			return nil, err
 		}
+		return []command.Output{{
+			String:    "successfully deleted label",
+			IsMessage: true,
+		}}, nil
 	}
 	_, err := ledger.RemoveLabelKeywords(args[0], strings.Split(args[1], ","))
 	if err != nil {

@@ -29,7 +29,7 @@ func AddChaseSource(args []string) ([]command.Output, error) {
 		return []command.Output{}, errors.New("must specify source name, last four account digits, account type, and directories")
 	}
 
-	directories, err := util.SplitWordsIgnoreQuotes(args[3])
+	directories, err := util.SplitWordsIgnoreQuotes(args[3], ',')
 	if err != nil {
 		return []command.Output{}, fmt.Errorf("parse directories: %w", err)
 	}
