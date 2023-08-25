@@ -83,3 +83,16 @@ func postProcessVenmo(entry *ledger.Entry, row []string, accountHolder string) e
 	}
 	return nil
 }
+
+func AddVenmoSource(vs VenmoSource) error {
+	s, err := Get()
+	if err != nil {
+		return err
+	}
+	err = vs.Validate()
+	if err != nil {
+		return err
+	}
+	s.Venmo = append(s.Venmo, vs)
+	return saveSources(s)
+}

@@ -36,11 +36,11 @@ var (
 )
 
 type ChaseSource struct {
-	SourceName  string
-	Directories []string
-	LastDigits  string
-	AccountType string
-	csvSource   *csv.Source
+	SourceName  string      `yaml:"name"`
+	Directories []string    `yaml:"directories"`
+	LastDigits  string      `yaml:"last_four_digits"`
+	AccountType string      `yaml:"account_type"`
+	csvSource   *csv.Source `yaml:"-"`
 }
 
 func (s *ChaseSource) Name() string {
@@ -49,7 +49,7 @@ func (s *ChaseSource) Name() string {
 
 func (s *ChaseSource) Validate() error {
 	if len(s.LastDigits) != 4 || !fourDigitPattern.MatchString(s.LastDigits) {
-		return fmt.Errorf("Chase CSV source validation: last_four_digits must be exactly four digits")
+		return fmt.Errorf("Chase CSV source validation: last_four_digits must be exactly four digits (%s)", s.LastDigits)
 	}
 	if s.AccountType != "credit" && s.AccountType != "non-credit" {
 		return fmt.Errorf("Chase CSV source validation: account_type must be 'credit' or 'non-credit'")
@@ -82,7 +82,7 @@ func (s *ChaseSource) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		DateFormat:       ChaseDateFormat,
 		HeaderRows:       1,
 		OrderDescending:  true,
-		PostProcessEntry: PostProcessChase,
+		PostProcessEntry: postProcessChase,
 	}
 	fileNamePattern, err := regexp.Compile(fmt.Sprintf("Chase%s_Activity.*", s.LastDigits))
 	if err != nil {
@@ -100,7 +100,7 @@ func (s *ChaseSource) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-func PostProcessChase(entry *ledger.Entry, row []string) error {
+func postProcessChase(entry *ledger.Entry, row []string) error {
 	entry.SourceType = ChaseSourceType
 	month, day := util.ExtractDateFromTitle(entry.Memo)
 	if month > 0 && day > 0 {
@@ -110,13 +110,22 @@ func PostProcessChase(entry *ledger.Entry, row []string) error {
 			entry.Date = newDate
 		}
 	}
-	entry.ID = hashEntry(entry)
+	entry.ID = hashEntry(*entry)
 	return nil
 }
 
-func hashEntry(entry *ledger.Entry) string {
+func hashEntry(entry ledger.Entry) string {
 	str := fmt.Sprintf("%s_%f", entry.Date.Format(ChaseDateFormat), entry.Balance)
 	algorithm := fnv.New32a()
 	algorithm.Write([]byte(str))
 	return fmt.Sprintf("%d", algorithm.Sum32())
+}
+
+func AddChaseSource(cs ChaseSource) error {
+	s, err := Get()
+	if err != nil {
+		return err
+	}
+	s.Chase = append(s.Chase, cs)
+	return saveSources(s)
 }
