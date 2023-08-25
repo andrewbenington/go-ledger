@@ -14,10 +14,17 @@ var (
 	AddChaseCommand = &command.Command{
 		Name:  "chase",
 		Short: "add Chase source",
-		ExpectedArgs: []command.ArgOptions{
+		ExpectedArgs: []command.Argument{
 			{Name: "Name"},
 			{Name: "Last Four Digits"},
-			{Name: "Account Type"},
+			{
+				Name: "Account Type",
+				Options: []command.ArgOption{
+					{Label: "Credit", Value: "credit"},
+					{Label: "Non-Credit", Value: "non-credit"},
+				},
+				Type: command.SelectArg,
+			},
 			{Name: "Directories"},
 		},
 		Run: AddChaseSource,

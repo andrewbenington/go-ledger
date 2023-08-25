@@ -12,7 +12,7 @@ type Command struct {
 	Short        string
 	Long         string
 	SubCommands  []*Command
-	ExpectedArgs []ArgOptions
+	ExpectedArgs []Argument
 	Run          func(args []string) ([]Output, error)
 	ShowLogs     bool
 }

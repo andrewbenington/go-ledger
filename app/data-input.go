@@ -15,7 +15,7 @@ type FormInput interface {
 	SetInputCapture(key *tcell.EventKey) *tcell.EventKey
 }
 
-func formViewFromCommand(c *command.Command) *DataInput {
+func dataInputFromCommand(c *command.Command) *DataInput {
 	dataInput := &DataInput{
 		form:   tview.NewForm(),
 		values: make([]string, len(c.ExpectedArgs)),
@@ -24,24 +24,14 @@ func formViewFromCommand(c *command.Command) *DataInput {
 	for i := range c.ExpectedArgs {
 		index := i
 		arg := c.ExpectedArgs[index]
-		// add field label
-		// form.view.AddItem(tview.NewTextView().SetText(arg.Name), 1, 0, false)
-		// var field tview.Primitive
 		switch arg.Type {
 		case command.StringArg:
 			dataInput.addStringArgField(arg, i)
 		case command.BoolArg:
-			dataInput.form.AddCheckbox(arg.Name, false, func(checked bool) {
-				if checked {
-					dataInput.values[index] = "true"
-				} else {
-					dataInput.values[index] = "false"
-				}
-			})
-			// field = form.buildCheckboxFieldAtIndex(arg, index)
+			dataInput.addBoolArgField(arg, i)
+		case command.SelectArg:
+			dataInput.addSelectArgField(arg, i)
 		}
-		// form.view.AddItem(field, 1, 0, index == 0)
-		// form.view.AddItem(nil, 1, 0, false)
 	}
 	dataInput.form.AddButton("Done", func() {
 		if c.ShowLogs {
@@ -51,16 +41,10 @@ func formViewFromCommand(c *command.Command) *DataInput {
 		runCommand(c, dataInput.values)
 	})
 	dataInput.form.AddButton("Cancel", popStack)
-	// create buttons and add to Form
-	// form.view.AddItem(form.doneBtn, 1, 0, false)
-	// form.fields[len(form.fields)-2] = form.doneBtn
-	// form.view.AddItem(form.cancelBtn, 1, 0, false)
-	// form.fields[len(form.fields)-1] = form.cancelBtn
-	// LogInterface(form)
 	return dataInput
 }
 
-func (d *DataInput) addStringArgField(arg command.ArgOptions, index int) {
+func (d *DataInput) addStringArgField(arg command.Argument, index int) {
 	d.form.AddInputField(arg.Name, "", 0, nil, func(text string) {
 		d.values[index] = text
 	})
@@ -74,4 +58,24 @@ func (d *DataInput) addStringArgField(arg command.ArgOptions, index int) {
 			field.SetAutocompletedFunc(arg.OnAutoCompletedWithField(field))
 		}
 	}
+}
+
+func (d *DataInput) addBoolArgField(arg command.Argument, index int) {
+	d.form.AddCheckbox(arg.Name, false, func(checked bool) {
+		if checked {
+			d.values[index] = "true"
+		} else {
+			d.values[index] = "false"
+		}
+	})
+}
+
+func (d *DataInput) addSelectArgField(arg command.Argument, index int) {
+	optionLabels := []string{}
+	for _, option := range arg.Options {
+		optionLabels = append(optionLabels, option.Label)
+	}
+	d.form.AddDropDown(arg.Name, optionLabels, 0, func(_ string, i int) {
+		d.values[index] = arg.Options[i].Value
+	})
 }

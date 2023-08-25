@@ -12,7 +12,7 @@ var (
 	RemoveKeywordCommand = &command.Command{
 		Name:  "remove keywords",
 		Short: "remove comma-separated keywords from label",
-		ExpectedArgs: []command.ArgOptions{
+		ExpectedArgs: []command.Argument{
 			{Name: "Label", AutoComplete: autoCompleteLabel},
 			{Name: "Keywords (Comma-separated)"},
 			{Name: "Delete Label", Type: command.BoolArg},

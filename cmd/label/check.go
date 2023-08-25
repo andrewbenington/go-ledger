@@ -9,7 +9,7 @@ var (
 	CheckCommand = &command.Command{
 		Name:  "check",
 		Short: "check label keywords",
-		ExpectedArgs: []command.ArgOptions{
+		ExpectedArgs: []command.Argument{
 			{Name: "Label", AutoComplete: autoCompleteLabel},
 		},
 		Run: CheckLabel,

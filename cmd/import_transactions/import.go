@@ -14,7 +14,7 @@ var (
 		Short: "Import transactions from sources",
 		Long: `go-ledger will search for files for each source, and import
 any transactions in those files from the specified year`,
-		ExpectedArgs: []command.ArgOptions{
+		ExpectedArgs: []command.Argument{
 			{Name: "Year"},
 		},
 		Run:      Import,

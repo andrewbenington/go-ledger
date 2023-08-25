@@ -13,7 +13,7 @@ var (
 	AddKeywordCommand = &command.Command{
 		Name:  "add keyword",
 		Short: "add comma-separated keywords to label",
-		ExpectedArgs: []command.ArgOptions{
+		ExpectedArgs: []command.Argument{
 			{Name: "Label (new or existing)", AutoComplete: autoCompleteLabel},
 			{Name: "Keywords (Comma-separated)"},
 		},

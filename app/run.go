@@ -26,7 +26,7 @@ func runCommand(c *command.Command, args []string) {
 // runCommandWithInput takes user input for the given command, runs the
 // command with those inputs as arguments, and displays the output
 func runCommandWithInput(c *command.Command) {
-	dataInput := formViewFromCommand(c)
+	dataInput := dataInputFromCommand(c)
 	view.SetPrimitive(dataInput.form)
 }
 
