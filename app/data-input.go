@@ -1,6 +1,8 @@
 package app
 
 import (
+	"strings"
+
 	"github.com/andrewbenington/go-ledger/command"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -15,7 +17,7 @@ type FormInput interface {
 	SetInputCapture(key *tcell.EventKey) *tcell.EventKey
 }
 
-func dataInputFromCommand(c *command.Command) *DataInput {
+func dataInputFromCommand(c *command.Command, initialValues []string) *DataInput {
 	dataInput := &DataInput{
 		form:   tview.NewForm(),
 		values: make([]string, len(c.ExpectedArgs)),
@@ -24,13 +26,20 @@ func dataInputFromCommand(c *command.Command) *DataInput {
 	for i := range c.ExpectedArgs {
 		index := i
 		arg := c.ExpectedArgs[index]
+		if len(initialValues) > index {
+			dataInput.values[index] = initialValues[index]
+			if arg.IsConstant {
+				dataInput.form.AddTextView(arg.Name, initialValues[index], 0, 1, false, false)
+				continue
+			}
+		}
 		switch arg.Type {
 		case command.StringArg:
-			dataInput.addStringArgField(arg, i)
+			dataInput.addStringArgField(arg, index, initialValues)
 		case command.BoolArg:
-			dataInput.addBoolArgField(arg, i)
+			dataInput.addBoolArgField(arg, index, initialValues)
 		case command.SelectArg:
-			dataInput.addSelectArgField(arg, i)
+			dataInput.addSelectArgField(arg, index, initialValues)
 		}
 	}
 	dataInput.form.AddButton("Done", func() {
@@ -44,12 +53,19 @@ func dataInputFromCommand(c *command.Command) *DataInput {
 	return dataInput
 }
 
-func (d *DataInput) addStringArgField(arg command.Argument, index int) {
-	d.form.AddInputField(arg.Name, "", 0, nil, func(text string) {
+func (d *DataInput) addStringArgField(arg command.Argument, index int, initial []string) {
+	initialValue := ""
+	if len(initial) > index {
+		initialValue = initial[index]
+	}
+
+	d.form.AddInputField(arg.Name, initialValue, 0, nil, func(text string) {
 		d.values[index] = text
 	})
+
 	formItem := d.form.GetFormItem(index)
 	field, ok := formItem.(*tview.InputField)
+
 	if ok {
 		if arg.AutoComplete != nil {
 			field.SetAutocompleteFunc(arg.AutoCompleteWithArgs(&d.values))
@@ -60,8 +76,9 @@ func (d *DataInput) addStringArgField(arg command.Argument, index int) {
 	}
 }
 
-func (d *DataInput) addBoolArgField(arg command.Argument, index int) {
-	d.form.AddCheckbox(arg.Name, false, func(checked bool) {
+func (d *DataInput) addBoolArgField(arg command.Argument, index int, initial []string) {
+	initialValue := len(initial) > index && strings.EqualFold(initial[index], "true")
+	d.form.AddCheckbox(arg.Name, initialValue, func(checked bool) {
 		if checked {
 			d.values[index] = "true"
 		} else {
@@ -70,12 +87,16 @@ func (d *DataInput) addBoolArgField(arg command.Argument, index int) {
 	})
 }
 
-func (d *DataInput) addSelectArgField(arg command.Argument, index int) {
+func (d *DataInput) addSelectArgField(arg command.Argument, index int, initial []string) {
+	initialValue := 0
 	optionLabels := []string{}
-	for _, option := range arg.Options {
+	for i, option := range arg.Options {
 		optionLabels = append(optionLabels, option.Label)
+		if len(initial) > i && strings.EqualFold(option.Value, initial[i]) {
+			initialValue = i
+		}
 	}
-	d.form.AddDropDown(arg.Name, optionLabels, 0, func(_ string, i int) {
+	d.form.AddDropDown(arg.Name, optionLabels, initialValue, func(_ string, i int) {
 		d.values[index] = arg.Options[i].Value
 	})
 }

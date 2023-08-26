@@ -13,6 +13,22 @@ import (
 // runCommand executes the the command with the given arguments and
 // calls DisplayOutput with the output
 func runCommand(c *command.Command, args []string) {
+	old := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	// send stdout to the log file
+	go func() {
+		reader := bufio.NewReader(r)
+		var err error = nil
+		var line string
+		for err == nil {
+			line, err = reader.ReadString('\n')
+			Log(line)
+		}
+		Log("Done logging")
+	}()
+
 	output, err := c.Run(args)
 	if err != nil {
 		output = []command.Output{{
@@ -20,13 +36,18 @@ func runCommand(c *command.Command, args []string) {
 			String:    fmt.Sprintf("ERROR:\n%s", err),
 		}}
 	}
+
+	r.Close()
+	w.Close()
+	os.Stdout = old
+
 	displayOutput(output)
 }
 
 // runCommandWithInput takes user input for the given command, runs the
 // command with those inputs as arguments, and displays the output
-func runCommandWithInput(c *command.Command) {
-	dataInput := dataInputFromCommand(c)
+func runCommandWithInput(c *command.Command, args []string) {
+	dataInput := dataInputFromCommand(c, args)
 	view.SetPrimitive(dataInput.form)
 }
 
@@ -47,8 +68,6 @@ func runCommandWithLogs(c *command.Command, args []string) {
 	os.Stdout = w
 
 	go func() {
-		defer func() {
-		}()
 		output, err := c.Run(args)
 		if err != nil {
 			output = []command.Output{{

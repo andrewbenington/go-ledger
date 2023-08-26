@@ -5,11 +5,11 @@ import (
 )
 
 var (
-	AddCommand = &command.Command{
-		Name:  "add",
-		Short: "add source",
+	EditCommand = &command.Command{
+		Name:  "edit",
+		Short: "edit source",
 		SubCommands: []*command.Command{
-			AddChaseCommand,
+			EditChaseCommand,
 		},
 	}
 )

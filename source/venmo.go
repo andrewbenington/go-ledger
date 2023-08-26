@@ -43,6 +43,10 @@ func (s *VenmoSource) Name() string {
 	return s.SourceName
 }
 
+func (s *VenmoSource) Type() ledger.SourceType {
+	return ledger.VenmoSourceType
+}
+
 func (s *VenmoSource) Validate() error {
 	return nil
 }

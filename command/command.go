@@ -15,6 +15,7 @@ type Command struct {
 	ExpectedArgs []Argument
 	Run          func(args []string) ([]Output, error)
 	ShowLogs     bool
+	PrefillForm  bool
 }
 
 func (c *Command) ToCobra() *cobra.Command {

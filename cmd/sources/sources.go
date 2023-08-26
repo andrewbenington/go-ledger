@@ -8,7 +8,7 @@ var (
 		Short: "Manage sources",
 		Long:  `go-ledger can pull transaction data from multiple sources`,
 		SubCommands: []*command.Command{
-			ListCommand, AddCommand,
+			ListCommand, AddCommand, EditCommand,
 		},
 	}
 )

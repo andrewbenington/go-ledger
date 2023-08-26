@@ -14,7 +14,6 @@ import (
 
 const (
 	ChaseDateFormat = "01/02/2006"
-	ChaseSourceType = "CHASE"
 )
 
 var (
@@ -45,6 +44,10 @@ type ChaseSource struct {
 
 func (s *ChaseSource) Name() string {
 	return s.SourceName
+}
+
+func (s *ChaseSource) Type() ledger.SourceType {
+	return ledger.ChaseSourceType
 }
 
 func (s *ChaseSource) Validate() error {
@@ -101,7 +104,7 @@ func (s *ChaseSource) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func postProcessChase(entry *ledger.Entry, row []string) error {
-	entry.SourceType = ChaseSourceType
+	entry.SourceType = string(ledger.ChaseSourceType)
 	month, day := util.ExtractDateFromTitle(entry.Memo)
 	if month > 0 && day > 0 {
 		newDate := time.Date(entry.Date.Year(), time.Month(month), day, 0, 0, 0, 0, time.UTC)
@@ -122,10 +125,29 @@ func hashEntry(entry ledger.Entry) string {
 }
 
 func AddChaseSource(cs ChaseSource) error {
-	s, err := Get()
+	sources, err := Get()
 	if err != nil {
 		return err
 	}
-	s.Chase = append(s.Chase, cs)
-	return saveSources(s)
+	sources.Chase = append(sources.Chase, cs)
+	return saveSources(sources)
+}
+
+func EditChaseSource(originalName string, cs ChaseSource) error {
+	sources, err := Get()
+	if err != nil {
+		return err
+	}
+	originalSourceIndex := -1
+	for i, s := range sources.Chase {
+		if s.SourceName == originalName {
+			originalSourceIndex = i
+			break
+		}
+	}
+	if originalSourceIndex == -1 {
+		return fmt.Errorf("no Chase source with name '%s'", cs.SourceName)
+	}
+	sources.Chase[originalSourceIndex] = cs
+	return saveSources(sources)
 }

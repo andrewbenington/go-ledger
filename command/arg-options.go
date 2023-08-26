@@ -17,6 +17,7 @@ type ArgOption struct {
 
 type Argument struct {
 	Name            string
+	IsConstant      bool
 	AutoComplete    func(currentText string, currentArgs *[]string) []string
 	OnAutoCompleted func(text string, index int, field *tview.InputField) bool
 	Type            ArgType

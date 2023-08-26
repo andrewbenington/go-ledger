@@ -67,8 +67,8 @@ func doCommand(c *command.Command, args []string) {
 		view.SetPrimitive(listFromSubcommands(c))
 		return
 	}
-	if len(c.ExpectedArgs) > 0 && len(args) == 0 {
-		runCommandWithInput(c)
+	if len(c.ExpectedArgs) > 0 && (c.PrefillForm || len(args) != len(c.ExpectedArgs)) {
+		runCommandWithInput(c, args)
 		return
 	}
 	if c.ShowLogs {
