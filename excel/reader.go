@@ -33,6 +33,9 @@ func LedgerFromFile(year int) (*ledger.Ledger, error) {
 
 func addEntriesFromFile(l *ledger.Ledger, file *excelize.File) error {
 	for _, sheet := range file.GetSheetList() {
+		if sheet == "Overview" {
+			continue
+		}
 		newEntries, err := ledgerEntriesFromSheet(file, sheet)
 		if err != nil {
 			return fmt.Errorf("read sheet %s: %w", sheet, err)
@@ -52,7 +55,7 @@ func ledgerEntriesFromSheet(file *excelize.File, sheet string) ([]ledger.Entry, 
 	for _, row := range rows[1:] {
 		entry, err := ledgerEntryFromRow(row)
 		if err != nil {
-			fmt.Printf("error getting entry from from row %v: %s\n", row, err)
+			fmt.Printf("get entry from from %s row %v: %s\n", sheet, row, err)
 			continue
 		}
 		if cfg.IgnoreEntry(entry) {

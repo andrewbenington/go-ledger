@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/andrewbenington/go-ledger/cmd/download"
 	"github.com/andrewbenington/go-ledger/cmd/import_transactions"
 	"github.com/andrewbenington/go-ledger/cmd/label"
 	"github.com/andrewbenington/go-ledger/cmd/sources"
@@ -16,7 +17,7 @@ var rootCmd = &command.Command{
 	Long: `Go-Ledger manages a history of transactions. It can automatically import, label, and de-duplicate transactions
 	from source CSV files.`,
 	SubCommands: []*command.Command{
-		label.LabelCmd, import_transactions.ImportCmd, sources.SourceCmd,
+		label.LabelCmd, import_transactions.ImportCmd, sources.SourceCmd, download.DownloadCmd,
 	},
 }
 

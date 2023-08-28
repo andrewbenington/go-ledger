@@ -9,6 +9,7 @@ import (
 // depending on if there are multiple outputs
 func displayOutput(outputs []command.Output) {
 	if len(outputs) == 0 {
+		popStack()
 		return
 	}
 	if outputs[0].IsMessage {
