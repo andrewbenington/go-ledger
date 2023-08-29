@@ -86,6 +86,7 @@ func (s *ChaseSource) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		HeaderRows:       1,
 		OrderDescending:  true,
 		PostProcessEntry: postProcessChase,
+		GenerateID:       generateChaseID,
 	}
 	fileNamePattern, err := regexp.Compile(fmt.Sprintf("Chase%s_Activity.*", s.LastDigits))
 	if err != nil {
@@ -113,15 +114,20 @@ func postProcessChase(entry *ledger.Entry, row []string) error {
 			entry.Date = newDate
 		}
 	}
-	entry.ID = hashEntry(*entry)
+	entry.ID = generateChaseID(*entry)
 	return nil
 }
 
-func hashEntry(entry ledger.Entry) string {
-	str := fmt.Sprintf("%s_%f", entry.Date.Format(ChaseDateFormat), entry.Balance)
+func generateChaseID(entry ledger.Entry) string {
+	str := ""
+	if entry.Type == "Sale" {
+		str = fmt.Sprintf("%s_%s_%s", entry.Date.Format(ChaseDateFormat), entry.Memo, entry.Type)
+	} else {
+		str = fmt.Sprintf("%f_%s", entry.Balance, entry.Type)
+	}
 	algorithm := fnv.New32a()
 	algorithm.Write([]byte(str))
-	return fmt.Sprintf("%d", algorithm.Sum32())
+	return fmt.Sprintf("%x", algorithm.Sum32())
 }
 
 func AddChaseSource(cs ChaseSource) error {

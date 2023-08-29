@@ -21,7 +21,7 @@ func (l *Ledger) InsertEntries(entries []Entry) {
 		if existingEntry, ok := l.entryMap[e.ID]; !ok {
 			l.entries = append(l.entries, e)
 			l.entryMap[e.ID] = &l.entries[len(l.entries)-1]
-		} else if existingEntry.Label == "" && e.Label != "" {
+		} else if (existingEntry.Label == "" || existingEntry.Label == "Other") && e.Label != "" {
 			existingEntry.Label = e.Label
 		}
 	}

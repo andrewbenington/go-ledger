@@ -59,7 +59,7 @@ func StringToRGB(s string) string {
 	hash.Write([]byte(s))
 	hashCode := float64(hash.Sum32())
 	hue := hashCode / (2 ^ 32) * 360
-	red, green, blue := color.HslToRgb(hue, hashCode/(2^32)*0.5+2, 0.4)
+	red, green, blue := color.HslToRgb(hue, 0.8, 0.4)
 
 	return fmt.Sprintf("%02X%02X%02X", red, green, blue)
 }

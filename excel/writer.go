@@ -192,6 +192,13 @@ func setColumnWidths(file *excelize.File, sheetName string, l *ledger.Ledger) er
 			return err
 		}
 	}
+	notesColumn, err := excelize.ColumnNumberToName(ledger.NotesIndex + 1)
+	if err == nil {
+		err = file.SetColWidth(sheetName, notesColumn, notesColumn, 40)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -330,9 +337,13 @@ func addOverviewTotal(file *excelize.File) error {
 }
 
 func applyLabelTextColor(file *excelize.File, label string, sheet string, cell string) error {
+	color := "000000"
+	if label != "Other" {
+		color = util.StringToRGB(label)
+	}
 	style := &excelize.Style{
 		Font: &excelize.Font{
-			Color: util.StringToRGB(label),
+			Color: color,
 			Bold:  true,
 		},
 	}

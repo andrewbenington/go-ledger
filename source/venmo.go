@@ -1,7 +1,9 @@
 package source
 
 import (
+	"fmt"
 	"regexp"
+	"strconv"
 
 	"github.com/andrewbenington/go-ledger/csv"
 	"github.com/andrewbenington/go-ledger/file"
@@ -28,6 +30,7 @@ var (
 		DateFormat: VenmoDateFormat,
 		HeaderRows: 4,
 		FooterRows: 1,
+		GenerateID: generateVenmoID,
 	}
 )
 
@@ -86,6 +89,14 @@ func postProcessVenmo(entry *ledger.Entry, row []string, accountHolder string) e
 		entry.Person = row[7]
 	}
 	return nil
+}
+
+func generateVenmoID(entry ledger.Entry) string {
+	num, err := strconv.Atoi(entry.ID)
+	if err != nil {
+		return entry.ID
+	}
+	return fmt.Sprintf("%x", num)
 }
 
 func AddVenmoSource(vs VenmoSource) error {

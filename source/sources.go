@@ -92,3 +92,15 @@ func saveSources(s *Sources) error {
 	}
 	return os.WriteFile(filepath.Join(configFolder, configFile), rawBytes, 0755)
 }
+
+func GenerateSourceID(entry ledger.Entry) string {
+	switch entry.SourceType {
+	case string(ledger.ChaseSourceType):
+		return generateChaseID(entry)
+	case string(ledger.VenmoSourceType):
+		return generateVenmoID(entry)
+	default:
+		fmt.Println("source" + entry.SourceType + entry.SourceName)
+		return entry.ID
+	}
+}

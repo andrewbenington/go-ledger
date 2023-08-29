@@ -52,10 +52,11 @@ func (l *Label) RegExp() (*regexp.Regexp, error) {
 	}
 	reString := ""
 	for i, keyword := range l.Keywords {
+		escaped := strings.ReplaceAll(keyword, "/", "//")
 		if i > 0 {
 			reString = fmt.Sprintf("%s|", reString)
 		}
-		reString = fmt.Sprintf("%s%s", reString, keyword)
+		reString = fmt.Sprintf("%s%s", reString, strings.ToLower(escaped))
 	}
 	return regexp.Compile(reString)
 }

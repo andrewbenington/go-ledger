@@ -21,7 +21,9 @@ type Source struct {
 	OrderDescending bool   `yaml:"order_descending"`
 	// called after the entry has been populated with defined columns
 	// returns true if entry should be ignored
-	PostProcessEntry  func(*ledger.Entry, []string) error
+	PostProcessEntry func(*ledger.Entry, []string) error
+	// generate unique ID for deduplication
+	GenerateID        func(ledger.Entry) string
 	FileSearchPattern file.SearchPattern
 }
 
@@ -85,6 +87,7 @@ func (s *Source) LedgerEntriesFromFile(filename string, year int) ([]ledger.Entr
 				return nil, err
 			}
 			err = s.PostProcessEntry(entry, row)
+			entry.ID = s.GenerateID(*entry)
 			if err != nil {
 				return nil, err
 			}
@@ -92,6 +95,9 @@ func (s *Source) LedgerEntriesFromFile(filename string, year int) ([]ledger.Entr
 				continue
 			}
 			entry.Label = ledger.FindLabel(entry.Memo)
+			if entry.Label == "" {
+				entry.Label = "Other"
+			}
 			if s.OrderDescending {
 				entries = append([]ledger.Entry{*entry}, entries...)
 			} else {

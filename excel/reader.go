@@ -7,6 +7,7 @@ import (
 
 	"github.com/andrewbenington/go-ledger/config"
 	"github.com/andrewbenington/go-ledger/ledger"
+	"github.com/andrewbenington/go-ledger/source"
 	"github.com/andrewbenington/go-ledger/util"
 	"github.com/xuri/excelize/v2"
 )
@@ -107,5 +108,9 @@ func ledgerEntryFromRow(row []string) (entry *ledger.Entry, err error) {
 	if len(row) > ledger.LabelIndex {
 		entry.Label = util.NormalizeUnicode(row[ledger.LabelIndex])
 	}
+	if len(row) > ledger.NotesIndex {
+		entry.Notes = util.NormalizeUnicode(row[ledger.NotesIndex])
+	}
+	entry.ID = source.GenerateSourceID(*entry)
 	return entry, nil
 }
