@@ -1,9 +1,10 @@
 # transaction data + ledgers
 *.csv
-*.xlsx
+*.xls*
 
 bin/
 *.yaml
 *.log
+*.exe
 
 .DS_Store
