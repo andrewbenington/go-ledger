@@ -40,6 +40,19 @@ func ListSources(args []string) ([]command.Output, error) {
 				chaseSource.AccountType,
 				strings.Join(chaseSource.Directories, ","),
 			}
+		} else if venmoSource, ok := s.(*source.VenmoSource); ok {
+			editCommand = EditVenmoCommand
+			hideTransfersArg := "false"
+			if venmoSource.HideTransfers {
+				hideTransfersArg = "true"
+			}
+			args = []string{
+				venmoSource.SourceName,
+				venmoSource.SourceName,
+				venmoSource.AccountHolderName,
+				hideTransfersArg,
+				strings.Join(venmoSource.Directories, ","),
+			}
 		}
 		outputs = append(outputs, command.Output{
 			String: s.Name(),

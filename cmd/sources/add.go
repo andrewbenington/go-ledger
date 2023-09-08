@@ -9,7 +9,7 @@ var (
 		Name:  "add",
 		Short: "add source",
 		SubCommands: []*command.Command{
-			AddChaseCommand,
+			AddChaseCommand, AddVenmoCommand,
 		},
 	}
 )

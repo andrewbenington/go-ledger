@@ -62,6 +62,7 @@ func (s *VenmoSource) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	fields := struct {
 		SourceName        string   `yaml:"name"`
 		AccountHolderName string   `yaml:"account_holder_name"`
+		HideTransfers     bool     `yaml:"hide_transfers"`
 		Directories       []string `yaml:"directories"`
 	}{}
 	err := unmarshal(&fields)
@@ -70,6 +71,7 @@ func (s *VenmoSource) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 	s.SourceName = fields.SourceName
 	s.AccountHolderName = fields.AccountHolderName
+	s.HideTransfers = fields.HideTransfers
 	s.Directories = fields.Directories
 	s.csvSource = CSVSource
 	s.csvSource.PostProcessEntry = func(entry *ledger.Entry, row []string) error {
@@ -110,4 +112,23 @@ func AddVenmoSource(vs VenmoSource) error {
 	}
 	s.Venmo = append(s.Venmo, vs)
 	return saveSources(s)
+}
+
+func EditVenmoSource(originalName string, vs VenmoSource) error {
+	sources, err := Get()
+	if err != nil {
+		return err
+	}
+	originalSourceIndex := -1
+	for i, s := range sources.Venmo {
+		if s.SourceName == originalName {
+			originalSourceIndex = i
+			break
+		}
+	}
+	if originalSourceIndex == -1 {
+		return fmt.Errorf("no Venmo source with name '%s'", vs.SourceName)
+	}
+	sources.Venmo[originalSourceIndex] = vs
+	return saveSources(sources)
 }

@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/andrewbenington/go-ledger/command"
+	"github.com/andrewbenington/go-ledger/util"
 	"github.com/rivo/tview"
 )
 
@@ -26,7 +27,7 @@ func displayOutput(outputs []command.Output) {
 		list.AddItem(output.String, "", ' ', func() {
 			if len(output.Options) > 0 {
 				opt := options[0]
-				Log("Running %+v with %+v", opt.Name, opt.Args)
+				util.Log("Running %+v with %+v", opt.Name, opt.Args)
 				view.SetBorder(true).SetTitle(opt.Name)
 				stack = append(stack, opt.Select)
 				doCommand(opt.Select, opt.Args)

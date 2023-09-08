@@ -1,4 +1,4 @@
-package app
+package util
 
 import (
 	"fmt"
@@ -36,10 +36,10 @@ func LogInterface(obj interface{}) {
 	logToFile(fmt.Sprintf("%+v", obj), "go-ledger.log")
 }
 
-func LogStack() {
-	str := "Stack:"
-	for _, cmd := range stack {
-		str += " " + cmd.Name
-	}
-	logToFile(str, "go-ledger.log")
-}
+// func LogStack() {
+// 	str := "Stack:"
+// 	for _, cmd := range stack {
+// 		str += " " + cmd.Name
+// 	}
+// 	logToFile(str, "go-ledger.log")
+// }

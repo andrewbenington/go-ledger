@@ -43,6 +43,20 @@ func init() {
 }
 
 func AllLabels() []Label {
+	labels, err := loadLabels()
+	if err != nil {
+		fmt.Printf("Error loading labels: %s\n", err)
+		return nil
+	}
+	allLabels = labels
+	for i := range allLabels {
+		re, err := allLabels[i].RegExp()
+		if err != nil {
+			fmt.Printf("Error loading labels: %s\n", err)
+			continue
+		}
+		allLabels[i].re = re
+	}
 	return allLabels
 }
 

@@ -6,6 +6,7 @@ import (
 	"github.com/andrewbenington/go-ledger/cmd"
 	"github.com/andrewbenington/go-ledger/command"
 	"github.com/andrewbenington/go-ledger/config"
+	"github.com/andrewbenington/go-ledger/util"
 	"github.com/rivo/tview"
 )
 
@@ -38,7 +39,7 @@ func listFromSubcommands(c *command.Command) *tview.List {
 	for i := range c.SubCommands {
 		sc := c.SubCommands[i]
 		list.AddItem(sc.Name, sc.Short, []rune(sc.Name)[0], func() {
-			LogStack()
+			// LogStack()
 			stack = append(stack, sc)
 			doCommand(sc, nil)
 		})
@@ -60,8 +61,8 @@ func popStack() {
 // doCommand executes the given command, with input, output or
 // neither depending on the command's usage
 func doCommand(c *command.Command, args []string) {
-	LogInterface(c)
-	LogInterface(args)
+	util.LogInterface(c)
+	util.LogInterface(args)
 	view.SetBorder(true).SetTitle(c.Name)
 	if len(c.SubCommands) > 0 {
 		view.SetPrimitive(listFromSubcommands(c))

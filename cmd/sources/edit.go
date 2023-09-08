@@ -9,7 +9,7 @@ var (
 		Name:  "edit",
 		Short: "edit source",
 		SubCommands: []*command.Command{
-			EditChaseCommand,
+			EditChaseCommand, EditVenmoCommand,
 		},
 	}
 )

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/andrewbenington/go-ledger/command"
+	"github.com/andrewbenington/go-ledger/util"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -24,9 +25,9 @@ func runCommand(c *command.Command, args []string) {
 		var line string
 		for err == nil {
 			line, err = reader.ReadString('\n')
-			Log(line)
+			util.Log(line)
 		}
-		Log("Done logging")
+		util.Log("Done logging")
 	}()
 
 	output, err := c.Run(args)
