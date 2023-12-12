@@ -6,6 +6,10 @@ start: clean
 build:
 	go build -o bin/go-ledger .
 
+.PHONY: build-win
+build-win:
+	GOOS=windows go build -o bin/go-ledger.exe .
+
 .PHONY: lint
 lint:
 	golangci-lint run

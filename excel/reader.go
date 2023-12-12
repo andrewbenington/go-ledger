@@ -69,9 +69,6 @@ func ledgerEntriesFromSheet(file *excelize.File, sheet string) ([]ledger.Entry, 
 
 func ledgerEntryFromRow(row []string) (entry *ledger.Entry, err error) {
 	entry = &ledger.Entry{}
-	if len(row) > ledger.IDIndex {
-		entry.ID = util.NormalizeUnicode(row[ledger.IDIndex])
-	}
 	if len(row) > ledger.DateIndex {
 		entry.Date, err = time.Parse("1/2/06 15:04", row[ledger.DateIndex])
 		if err != nil {
@@ -95,12 +92,21 @@ func ledgerEntryFromRow(row []string) (entry *ledger.Entry, err error) {
 	}
 	if len(row) > ledger.TypeIndex {
 		entry.Type = util.NormalizeUnicode(row[ledger.TypeIndex])
+		if entry.Type == "" {
+			entry.Type = "Other"
+		}
 	}
 	if len(row) > ledger.SourceNameIndex {
 		entry.SourceName = util.NormalizeUnicode(row[ledger.SourceNameIndex])
+		if entry.SourceName == "" {
+			entry.SourceName = "Other"
+		}
 	}
 	if len(row) > ledger.SourceTypeIndex {
 		entry.SourceType = util.NormalizeUnicode(row[ledger.SourceTypeIndex])
+		if entry.SourceType == "" {
+			entry.SourceType = "OTHER"
+		}
 	}
 	if len(row) > ledger.PersonIndex {
 		entry.Person = util.NormalizeUnicode(row[ledger.PersonIndex])
@@ -111,6 +117,12 @@ func ledgerEntryFromRow(row []string) (entry *ledger.Entry, err error) {
 	if len(row) > ledger.NotesIndex {
 		entry.Notes = util.NormalizeUnicode(row[ledger.NotesIndex])
 	}
-	entry.ID = source.GenerateSourceID(*entry)
+	if len(row) > ledger.IDIndex {
+		entry.ID = util.NormalizeUnicode(row[ledger.IDIndex])
+		if entry.ID == "" {
+			entry.ID = source.GenerateSourceID(*entry)
+		}
+	}
+	// entry.ID = source.GenerateSourceID(*entry)
 	return entry, nil
 }

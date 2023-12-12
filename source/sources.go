@@ -1,6 +1,8 @@
 package source
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -100,7 +102,10 @@ func GenerateSourceID(entry ledger.Entry) string {
 	case string(ledger.VenmoSourceType):
 		return generateVenmoID(entry)
 	default:
-		fmt.Println("source" + entry.SourceType + entry.SourceName)
-		return entry.ID
+		bytes := make([]byte, 32)
+		_, _ = rand.Read(bytes)
+		base64Text := make([]byte, base64.StdEncoding.EncodedLen(len(bytes)))
+		base64.StdEncoding.Encode(base64Text, bytes)
+		return string(base64Text)
 	}
 }
